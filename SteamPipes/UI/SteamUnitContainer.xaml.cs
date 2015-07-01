@@ -70,15 +70,6 @@ namespace SteamPipes
 				drawingContext.DrawRoundedRectangle(Brushes.Transparent, new Pen(Brushes.Red, 2), new Rect(RenderSize), 5, 5);
 
 
-				var text = new FormattedText(Math.Floor(SteamUnit.SteamStored).ToString(), CultureInfo.CurrentUICulture,
-					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
-
-				drawingContext.DrawText(text, new Point(this.RenderSize.Width / 2 - text.MinWidth / 2, RenderSize.Height / 2 - text.Height - 2));
-
-				text = new FormattedText(Math.Floor(SteamUnit.Temperature).ToString() + '%', CultureInfo.CurrentUICulture,
-					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
-
-				drawingContext.DrawText(text, new Point(this.RenderSize.Width / 2 - text.MinWidth / 2, RenderSize.Height / 2 + text.Height + 2));
 
 				var solidColorBrush = Brushes.SandyBrown;
 				if (SteamUnit is ISteamProvider)
@@ -153,6 +144,20 @@ namespace SteamPipes
 						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 1 / 4),
 						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 3 / 4));
 				}
+
+				double y = 0;
+				var text = new FormattedText("steam: " + Math.Floor(SteamUnit.SteamStored), CultureInfo.CurrentUICulture,
+					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
+				drawingContext.DrawText(text, new Point(0, y));
+				y += text.Height + 2;
+				text = new FormattedText("density: " + Math.Floor(SteamUnit.SteamDensity) + '%', CultureInfo.CurrentUICulture,
+					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
+				drawingContext.DrawText(text, new Point(0, y));
+
+				y += text.Height + 2;
+				text = new FormattedText("temp: " + Math.Floor(SteamUnit.Temperature) + '%', CultureInfo.CurrentUICulture,
+					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
+				drawingContext.DrawText(text, new Point(0, y));
 			}
 		}
 

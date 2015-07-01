@@ -150,6 +150,27 @@ namespace SteamPipes
 
 		public decimal MaxSteam { get; set; }
 
+		public double SteamDensity
+		{
+			get
+			{
+				double x = (double)SteamStored;
+				double c = (double)MaxSteam;
+				double a = c / 100;
+				double b = 100 / c;
+				double y = Math.Log10((x + a) * b) * 50;
+				if (y > 100)
+				{
+					return 100;
+				}
+				if (y < 0)
+				{
+					return 0;
+				}
+				return y;
+			}
+		}
+
 		public List<SteamUnit> AllAdjacentConnections
 		{
 			get { return _allAdjacentConnections; }

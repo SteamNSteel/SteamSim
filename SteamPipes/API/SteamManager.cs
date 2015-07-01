@@ -331,6 +331,8 @@ namespace SteamPipes
 			}
 		}
 
+		
+
 		public static void StartSimulationThread()
 		{
 			Thread thread = new Thread(Start) {Name = "Simluation Thread"};
