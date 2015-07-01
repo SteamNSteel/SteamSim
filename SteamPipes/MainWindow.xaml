@@ -22,8 +22,13 @@
             </Grid>
             <GroupBox Header="Action">
                 <WrapPanel x:Name="PlaceBlockGroup">
-                    <Button x:Name="CleareButton" Content="Clear Block" Width="75" Click="CleareButton_OnClick" />
-                    <Button x:Name="PlacePipeButton" Content="Add Pipe" Width="75" Click="PlacePipeButton_Click" />
+                    <Button x:Name="ClearButton" Content="Clear" Width="75" Click="CleareButton_OnClick" />
+                    <Label />
+                    <Button x:Name="PlacePipeButton" Content="Add Pipe" Width="75" Click="PlacePipeButton_Click" Background="SandyBrown" />
+                    <Button x:Name="PlaceBoilerButton" Content="Add Boiler" Width="75" Click="PlaceBoilerButton_Click" Background="Green" />
+                    <Button x:Name="PlaceFurnace" Content="Add Furnace" Width="75" Click="PlaceFurnaceButton_Click" Background="Salmon" />
+                    <Button x:Name="PlaceBallMill" Content="Add Ball Mill" Width="75" Click="PlaceBallMillButton_Click" Background="Salmon"/>
+                    <!--<Label />-->
                     <Button x:Name="AddSteamButton" Content="+ Steam" Width="75" Click="AddSteamButton_Click"/>
                     <Button x:Name="RemoveSteamButton" Content="- Steam" Width="75" Click="RemoveSteamButton_Click"/>
                 </WrapPanel>

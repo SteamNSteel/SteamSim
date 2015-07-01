@@ -53,15 +53,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ClickBehaviour.cs" />
-    <Compile Include="PointI2D.cs" />
-    <Compile Include="SteamManager.cs" />
-    <Compile Include="SteamUnit.cs" />
-    <Compile Include="SteamUnitContainer.xaml.cs">
+    <Compile Include="API\Machines\Boiler.cs" />
+    <Compile Include="API\Machines\BallMill.cs" />
+    <Compile Include="API\Machines\Furnace.cs" />
+    <Compile Include="API\ISteamConsumer.cs" />
+    <Compile Include="API\ISteamProvider.cs" />
+    <Compile Include="UI\ClickBehaviour.cs" />
+    <Compile Include="API\PointI2D.cs" />
+    <Compile Include="API\SteamManager.cs" />
+    <Compile Include="API\SteamUnit.cs" />
+    <Compile Include="UI\SteamUnitContainer.xaml.cs">
       <DependentUpon>SteamUnitContainer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SteamVis.cs" />
-    <Compile Include="UpDownControl.xaml.cs">
+    <Compile Include="UI\SteamVis.cs" />
+    <Compile Include="UI\UpDownControl.xaml.cs">
       <DependentUpon>UpDownControl.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
@@ -76,11 +81,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SteamUnitContainer.xaml">
+    <Page Include="UI\SteamUnitContainer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UpDownControl.xaml">
+    <Page Include="UI\UpDownControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

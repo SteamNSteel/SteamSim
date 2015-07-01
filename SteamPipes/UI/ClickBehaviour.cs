@@ -6,6 +6,9 @@
 		PlaceBlock,
 		Clear,
 		AddSteam,
-		RemoveSteam
+		RemoveSteam,
+		PlaceBoiler,
+		PlaceBallMill,
+		PlaceFurnace
 	}
 }

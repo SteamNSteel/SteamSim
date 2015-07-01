@@ -4,7 +4,7 @@ using System.Windows.Documents;
 
 namespace SteamPipes
 {
-	internal class SteamUnit
+	public class SteamUnit
 	{
 		private readonly List<SteamUnit> _allAdjacentConnections = new List<SteamUnit>();
 		private readonly List<SteamUnit> _horizontalAdjacentConnections = new List<SteamUnit>();
@@ -13,17 +13,15 @@ namespace SteamPipes
 		private SteamUnit _unitLeft;
 		private SteamUnit _unitRight;
 		private decimal _steamStored;
-		public int X { get; private set; }
-		public int Y { get; private set; }
+		private decimal _temperature;
+		public int X { get; internal set; }
+		public int Y { get; internal set; }
 
-		internal SteamUnit(int x, int y)
+		public SteamUnit()
 		{
-			X = x;
-			Y = y;
-
 			SteamStored = 0;
 			MaxSteam = 1000;
-
+			HeatConductivity = 5;
 			FlowSourceUnits = new HashSet<SteamUnit>();
 		}
 
@@ -32,18 +30,18 @@ namespace SteamPipes
 			get { return _unitAbove; }
 			set
 			{
-				if (_unitAbove != value)
+				if (_unitAbove == value) return;
+				if ((this is ISteamConsumer && value is ISteamConsumer)) return;
+				if ((this is ISteamProvider && value is ISteamProvider)) return;
+				if (_unitAbove != null)
 				{
-					if (_unitAbove != null)
-					{
-						_allAdjacentConnections.Remove(_unitAbove);
-					}
-					if (value != null)
-					{
-						_allAdjacentConnections.Add(value);
-					}
-					InvokeConnectionsChanged();	
+					_allAdjacentConnections.Remove(_unitAbove);
 				}
+				if (value != null)
+				{
+					_allAdjacentConnections.Add(value);
+				}
+				InvokeConnectionsChanged();
 				_unitAbove = value;
 			}
 		}
@@ -70,8 +68,9 @@ namespace SteamPipes
 			get { return _unitBelow; }
 			set
 			{
-				if (_unitBelow != value)
-				{
+				if (_unitBelow == value) return;
+				if ((this is ISteamConsumer && value is ISteamConsumer)) return;
+				if ((this is ISteamProvider && value is ISteamProvider)) return;
 					if (_unitBelow != null)
 					{
 						_allAdjacentConnections.Remove(_unitBelow);
@@ -81,7 +80,7 @@ namespace SteamPipes
 						_allAdjacentConnections.Add(value);
 					}
 					InvokeConnectionsChanged();	
-				}
+				
 				_unitBelow = value;
 			}
 		}
@@ -91,21 +90,22 @@ namespace SteamPipes
 			get { return _unitLeft; }
 			set
 			{
-				if (_unitLeft != value)
-				{
-					if (_unitLeft != null)
-					{
-						_allAdjacentConnections.Remove(_unitLeft);
-						_horizontalAdjacentConnections.Remove(_unitLeft);
+				if (_unitLeft == value) return;
+				if ((this is ISteamConsumer && value is ISteamConsumer)) return;
+				if ((this is ISteamProvider && value is ISteamProvider)) return;
 
-					}
-					if (value != null)
-					{
-						_allAdjacentConnections.Add(value);
-						_horizontalAdjacentConnections.Add(value);
-					}
-					InvokeConnectionsChanged();
+				if (_unitLeft != null)
+				{
+					_allAdjacentConnections.Remove(_unitLeft);
+					_horizontalAdjacentConnections.Remove(_unitLeft);
+
 				}
+				if (value != null)
+				{
+					_allAdjacentConnections.Add(value);
+					_horizontalAdjacentConnections.Add(value);
+				}
+				InvokeConnectionsChanged();
 				_unitLeft = value;
 			}
 		}
@@ -115,20 +115,21 @@ namespace SteamPipes
 			get { return _unitRight; }
 			set
 			{
-				if (_unitRight != value)
+				if (_unitRight == value) return;
+				if ((this is ISteamConsumer && value is ISteamConsumer)) return;
+				if ((this is ISteamProvider && value is ISteamProvider)) return;
+				if (_unitRight != null)
 				{
-					if (_unitRight != null)
-					{
-						_allAdjacentConnections.Remove(_unitRight);
-						_horizontalAdjacentConnections.Remove(_unitRight);
-					}
-					if (value != null)
-					{
-						_allAdjacentConnections.Add(value);
-						_horizontalAdjacentConnections.Add(value);
-					}
-					InvokeConnectionsChanged();
+					_allAdjacentConnections.Remove(_unitRight);
+					_horizontalAdjacentConnections.Remove(_unitRight);
 				}
+				if (value != null)
+				{
+					_allAdjacentConnections.Add(value);
+					_horizontalAdjacentConnections.Add(value);
+				}
+				InvokeConnectionsChanged();
+				
 				_unitRight = value;
 			}
 		}
@@ -162,6 +163,23 @@ namespace SteamPipes
 		}
 
 		public HashSet<SteamUnit> FlowSourceUnits { get; private set; }
+		public decimal NewSteam { get; set; }
+
+		public decimal Temperature
+		{
+			get { return _temperature; }
+			set
+			{
+				if (_temperature != value)
+				{
+					_temperature = value;
+					InvokeDataChanged();
+				}
+
+			}
+		}
+
+		public decimal HeatConductivity { get; private set; }
 
 		public event EventHandler ConnectionsChanged;
 		public event EventHandler DataChanged;

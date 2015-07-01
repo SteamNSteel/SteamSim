@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using SteamPipes.API;
 
 namespace SteamPipes
 {
@@ -69,70 +70,86 @@ namespace SteamPipes
 				drawingContext.DrawRoundedRectangle(Brushes.Transparent, new Pen(Brushes.Red, 2), new Rect(RenderSize), 5, 5);
 
 
-				var text = new FormattedText(SteamUnit.SteamStored.ToString(), CultureInfo.CurrentUICulture,
+				var text = new FormattedText(Math.Floor(SteamUnit.SteamStored).ToString(), CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 
 				drawingContext.DrawText(text, new Point(this.RenderSize.Width / 2 - text.MinWidth / 2, RenderSize.Height / 2 - text.Height - 2));
 
+				text = new FormattedText(Math.Floor(SteamUnit.Temperature).ToString() + '%', CultureInfo.CurrentUICulture,
+					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
+
+				drawingContext.DrawText(text, new Point(this.RenderSize.Width / 2 - text.MinWidth / 2, RenderSize.Height / 2 + text.Height + 2));
+
+				var solidColorBrush = Brushes.SandyBrown;
+				if (SteamUnit is ISteamProvider)
+				{
+					solidColorBrush = Brushes.Green;
+				}
+				else if (SteamUnit is ISteamConsumer)
+				{
+					solidColorBrush = Brushes.Tomato;
+				}
+				
+
 				if (SteamUnit.UnitAbove != null)
 				{
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*0/4),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*1/4));
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*3/4, RenderSize.Height*0/4),
 						new Point(RenderSize.Width*3/4, RenderSize.Height*1/4));
 				}
 				else
 				{
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width * 1 / 4, RenderSize.Height * 1 / 4),
 						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 1 / 4));
 				}
 
 				if (SteamUnit.UnitBelow != null)
 				{
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*3/4),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*4/4));
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*3/4, RenderSize.Height*3/4),
 						new Point(RenderSize.Width*3/4, RenderSize.Height*4/4));
 				}
 				else
 				{
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width * 1 / 4, RenderSize.Height * 3 / 4),
 						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 3 / 4));
 				}
 
 				if (SteamUnit.UnitLeft != null)
 				{
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*0/4, RenderSize.Height*1/4),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*1/4));
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*0/4, RenderSize.Height*3/4),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*3/4));
 				}
 				else
 				{
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width * 1 / 4, RenderSize.Height * 1 / 4),
 						new Point(RenderSize.Width * 1 / 4, RenderSize.Height * 3 / 4));
 				}
 				if (SteamUnit.UnitRight != null)
 				{
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*3/4, RenderSize.Height*1/4),
 						new Point(RenderSize.Width*4/4, RenderSize.Height*1/4));
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*3/4, RenderSize.Height*3/4),
 						new Point(RenderSize.Width*4/4, RenderSize.Height*3/4));
 				}
 				else
 				{
-					drawingContext.DrawLine(new Pen(Brushes.SandyBrown, 4.0),
+					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 1 / 4),
 						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 3 / 4));
 				}
@@ -141,13 +158,7 @@ namespace SteamPipes
 
 		public void PlacePipe()
 		{
-			if (SteamUnit == null)
-			{
-				SteamUnit = SteamManager.CreateSteamUnit(Grid.GetColumn(this), Grid.GetRow(this));
-				SteamUnit.ConnectionsChanged += SteamUnitOnConnectionsChanged;
-				SteamUnit.DataChanged += SteamUnitDataChanged;
-			}
-			InvalidateVisual();
+			PlaceSteamUnit<SteamUnit>();
 		}
 
 		public void RemovePipe()
@@ -176,6 +187,39 @@ namespace SteamPipes
 			{
 				SteamManager.RemoveSteam(amount, SteamUnit);
 			}
+		}
+
+		public void PlaceBoiler()
+		{
+			PlaceSteamUnit<Boiler>();
+		}
+
+		public void PlaceBallMill()
+		{
+			PlaceSteamUnit<BallMill>();
+		}
+
+		public void PlaceFurnace()
+		{
+			PlaceSteamUnit<Furnace>();
+		}
+		
+		private void PlaceSteamUnit<T>() where T : SteamUnit, new()
+		{
+			if (SteamUnit != null && (!(SteamUnit is T)))
+			{
+				SteamManager.RemoveSteamUnit(SteamUnit);
+				SteamUnit.ConnectionsChanged -= SteamUnitOnConnectionsChanged;
+				SteamUnit.DataChanged -= SteamUnitDataChanged;
+				SteamUnit = null;
+			}
+			if (SteamUnit == null)
+			{
+				SteamUnit = SteamManager.CreateSteamUnit<T>(Grid.GetColumn(this), Grid.GetRow(this));
+				SteamUnit.ConnectionsChanged += SteamUnitOnConnectionsChanged;
+				SteamUnit.DataChanged += SteamUnitDataChanged;
+			}
+			InvalidateVisual();
 		}
 	}
 }

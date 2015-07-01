@@ -72,6 +72,15 @@ namespace SteamPipes
 					case ClickBehaviour.RemoveSteam:
 						objectIdentified.RemoveSteam(100);
 						break;
+					case ClickBehaviour.PlaceBoiler:
+						objectIdentified.PlaceBoiler();
+						break;
+					case ClickBehaviour.PlaceBallMill:
+						objectIdentified.PlaceBallMill();
+						break;
+					case ClickBehaviour.PlaceFurnace:
+						objectIdentified.PlaceFurnace();
+						break;
 				}
 			}
 		}
@@ -92,7 +101,31 @@ namespace SteamPipes
 
 		private void StepSimulationButton_Click(object sender, RoutedEventArgs e)
 		{
-			SteamManager.StepSimulation();
+			SteamManager.StepSimulation(1);
+		}
+
+		private void PlaceBoilerButton_Click(object sender, RoutedEventArgs e)
+		{
+			ToggleButton((Button)sender);
+			_clickBehaviour = ClickBehaviour.PlaceBoiler;
+		}
+
+		private void PlaceFurnaceButton_Click(object sender, RoutedEventArgs e)
+		{
+			ToggleButton((Button)sender);
+			_clickBehaviour = ClickBehaviour.PlaceFurnace;
+		}
+
+		private void PlaceBallMillButton_Click(object sender, RoutedEventArgs e)
+		{
+			ToggleButton((Button)sender);
+			_clickBehaviour = ClickBehaviour.PlaceBallMill;
+		}
+
+		protected override void OnClosed(EventArgs e)
+		{
+			base.OnClosed(e);
+			SteamManager.Stop();
 		}
 	}
 }
