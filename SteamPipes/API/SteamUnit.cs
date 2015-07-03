@@ -21,7 +21,7 @@ namespace SteamPipes
 		{
 			SteamStored = 0;
 			MaxSteam = 1000;
-			HeatConductivity = 5;
+			HeatConductivity = 2;
 			FlowSourceUnits = new HashSet<SteamUnit>();
 		}
 
