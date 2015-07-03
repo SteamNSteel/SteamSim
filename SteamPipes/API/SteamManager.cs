@@ -145,7 +145,8 @@ namespace SteamPipes
 			foreach (var steamProvider in SteamProviders.Values)
 			{
 				SteamUnit unit = (SteamUnit)steamProvider;
-				unit.FlowSourceUnits.Clear();
+				unit.SteamFlowSourceUnits.Clear();
+				unit.WaterFlowSourceUnits.Clear();
 				
 				unitsToProcess.Enqueue(unit);
 			}
@@ -157,7 +158,8 @@ namespace SteamPipes
 				if (unitsToProcess.Count == 0)
 				{
 					var steamUnit = unprocessedUnits.First();
-					steamUnit.FlowSourceUnits.Clear();
+					steamUnit.SteamFlowSourceUnits.Clear();
+					steamUnit.WaterFlowSourceUnits.Clear();
 					steamUnit.NewSteam = 0;
 					unitsToProcess.Enqueue(steamUnit);
 				}
@@ -174,7 +176,7 @@ namespace SteamPipes
 						{
 							if (connection.ProcessPass != _currentStep)
 							{
-								connection.FlowSourceUnits.Clear();
+								connection.SteamFlowSourceUnits.Clear();
 								connection.NewSteam = 0;
 								unitsToProcess.Enqueue(connection);
 							}
@@ -183,8 +185,9 @@ namespace SteamPipes
 						if (ConsumeSteam(unit, timeElapsed)) continue;
 						
 						TransferSteam(unit, timeElapsed);
+						CalculateUnitHeat(unit);
 						ProduceSteam(unit, timeElapsed);
-						//TransferWater(unit, timeElapsed);
+						TransferWater(unit, timeElapsed);
 						CondenseSteam(unit, timeElapsed);
 					}
 				}
@@ -206,24 +209,7 @@ namespace SteamPipes
 			unit.SteamStored -= newCondensation;
 			unit.WaterStored += waterGained;
 		}
-
-		private static void TransferSteam(SteamUnit unit, decimal timeElapsed)
-		{
-			var usableSteam = unit.SteamStored - unit.NewSteam;
-
-			if (usableSteam <= 0) return;
-			//First, work on any units above
-			if (unit.UnitAbove != null && !unit.FlowSourceUnits.Contains(unit.UnitAbove))
-			{
-				TransferSteamAbove(unit, usableSteam, timeElapsed);
-			}
-			if (usableSteam > 0 && unit.HorizontalAdjacentConnections.Any())
-			{
-				TransferSteamAcross(unit, usableSteam, timeElapsed);
-			}
-			CalculateUnitHeat(unit);
-		}
-
+		
 		private static void CalculateUnitHeat(SteamUnit unit)
 		{
 			var tempDifference = unit.SteamDensity - (double)unit.Temperature;
@@ -270,13 +256,30 @@ namespace SteamPipes
 			return false;
 		}
 
+		private static void TransferSteam(SteamUnit unit, decimal timeElapsed)
+		{
+			var usableSteam = unit.SteamStored - unit.NewSteam;
+
+			if (usableSteam <= 0) return;
+			//First, work on any units above
+			if (unit.UnitAbove != null && !unit.SteamFlowSourceUnits.Contains(unit.UnitAbove))
+			{
+				TransferSteamAbove(unit, usableSteam, timeElapsed);
+			}
+			if (usableSteam > 0 && unit.HorizontalAdjacentConnections.Any())
+			{
+				TransferSteamAcross(unit, usableSteam, timeElapsed);
+			}
+
+		}
+
 		private static void TransferSteamAcross(SteamUnit unit, decimal usableSteam, decimal timeElapsed)
 		{
 			List<SteamUnit> eligibleUnits = new List<SteamUnit>();
 			decimal steamSpaceAvailable = 0;
 			foreach (var neighbourUnit in unit.HorizontalAdjacentConnections)
 			{
-				if (unit.FlowSourceUnits.Contains(neighbourUnit))
+				if (unit.SteamFlowSourceUnits.Contains(neighbourUnit))
 				{
 					continue;
 				}
@@ -285,7 +288,7 @@ namespace SteamPipes
 				    (neighbourUnit.SteamStored < usableSteam || unit is ISteamProvider || neighbourUnit is ISteamConsumer))
 				{
 					eligibleUnits.Add(neighbourUnit);
-					steamSpaceAvailable += (neighbourUnit.MaxSteam - neighbourUnit.SteamStored);
+					steamSpaceAvailable += (neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored);
 				}
 			}
 
@@ -310,33 +313,116 @@ namespace SteamPipes
 				neighbourUnit.SteamStored += amountTransferred;
 				neighbourUnit.NewSteam += amountTransferred;
 				unit.SteamStored -= amountTransferred;
-				neighbourUnit.FlowSourceUnits.Add(unit);
+				neighbourUnit.SteamFlowSourceUnits.Add(unit);
 			}
 		}
 
 		private static void TransferSteamAbove(SteamUnit unit, decimal usableSteam, decimal timeElapsed)
 		{
-			if (unit.UnitAbove.SteamStored <= unit.UnitAbove.ActualMaxSteam)
+			var unitAbove = unit.UnitAbove;
+			if (unitAbove.SteamStored <= unitAbove.ActualMaxSteam)
 			{
 				var amountTransferred = usableSteam*timeElapsed;
 
-				if (unit.UnitAbove.SteamStored + amountTransferred > unit.UnitAbove.ActualMaxSteam)
+				if (unitAbove.SteamStored + amountTransferred > unitAbove.ActualMaxSteam)
 				{
-					amountTransferred = unit.UnitAbove.ActualMaxSteam - unit.UnitAbove.SteamStored;
+					amountTransferred = unitAbove.ActualMaxSteam - unitAbove.SteamStored;
 				}
 				
 				if (usableSteam - amountTransferred < 0)
 				{
 					amountTransferred = usableSteam;
 				}
-				unit.UnitAbove.SteamStored += amountTransferred;
-				unit.UnitAbove.NewSteam += amountTransferred;
+				unitAbove.SteamStored += amountTransferred;
+				unitAbove.NewSteam += amountTransferred;
 				unit.SteamStored -= amountTransferred;
-				unit.UnitAbove.FlowSourceUnits.Add(unit);
+				unitAbove.SteamFlowSourceUnits.Add(unit);
 			}
 		}
 
-		
+		private static void TransferWater(SteamUnit unit, decimal timeElapsed)
+		{
+			var usableWater = unit.WaterStored - unit.NewWater;
+
+			if (usableWater <= 0) return;
+			//First, work on any units above
+			if (unit.UnitBelow != null && !unit.WaterFlowSourceUnits.Contains(unit.UnitBelow))
+			{
+				TransferWaterBelow(unit, usableWater, timeElapsed);
+			}
+			if (usableWater > 0 && unit.HorizontalAdjacentConnections.Any())
+			{
+				TransferWaterAcross(unit, usableWater, timeElapsed);
+			}
+		}
+
+		private static void TransferWaterAcross(SteamUnit unit, decimal usableWater, decimal timeElapsed)
+		{
+			List<SteamUnit> eligibleUnits = new List<SteamUnit>();
+			decimal waterSpaceAvailable = 0;
+			foreach (var neighbourUnit in unit.HorizontalAdjacentConnections)
+			{
+				if (unit.WaterFlowSourceUnits.Contains(neighbourUnit))
+				{
+					continue;
+				}
+				//Steam providers can always push?
+				if (neighbourUnit.WaterStored < neighbourUnit.MaxWater &&
+					(neighbourUnit.WaterStored < usableWater))
+				{
+					eligibleUnits.Add(neighbourUnit);
+					waterSpaceAvailable += (neighbourUnit.MaxWater - neighbourUnit.WaterStored);
+				}
+			}
+
+			var originalWaterStored = usableWater;
+			foreach (var neighbourUnit in eligibleUnits)
+			{
+				var ratio = (neighbourUnit.MaxWater - neighbourUnit.WaterStored) / waterSpaceAvailable;
+
+				var amountTransferred = originalWaterStored * timeElapsed * ratio;
+
+				if (neighbourUnit.WaterStored + amountTransferred > neighbourUnit.MaxWater)
+				{
+					amountTransferred = neighbourUnit.MaxWater - neighbourUnit.WaterStored;
+				}
+
+				amountTransferred = amountTransferred * TransferRatio;
+				if (unit.WaterStored - amountTransferred < 0)
+				{
+					amountTransferred = unit.WaterStored;
+				}
+
+				neighbourUnit.WaterStored += amountTransferred;
+				neighbourUnit.NewWater += amountTransferred;
+				unit.WaterStored -= amountTransferred;
+				neighbourUnit.WaterFlowSourceUnits.Add(unit);
+			}
+		}
+
+		private static void TransferWaterBelow(SteamUnit unit, decimal usableWater, decimal timeElapsed)
+		{
+			var unitBelow = unit.UnitBelow;
+			if (unitBelow.WaterStored <= unitBelow.MaxWater)
+			{
+				var amountTransferred = usableWater * timeElapsed;
+
+				if (unitBelow.WaterStored + amountTransferred > unitBelow.MaxWater)
+				{
+					amountTransferred = unitBelow.MaxWater - unitBelow.WaterStored;
+				}
+
+				if (usableWater - amountTransferred < 0)
+				{
+					amountTransferred = usableWater;
+				}
+				unitBelow.WaterStored += amountTransferred;
+				unitBelow.NewWater += amountTransferred;
+				unit.WaterStored -= amountTransferred;
+				unitBelow.WaterFlowSourceUnits.Add(unit);
+			}
+		}
+
 
 		public static void StartSimulationThread()
 		{

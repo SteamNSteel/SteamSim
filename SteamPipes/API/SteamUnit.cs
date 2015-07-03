@@ -24,7 +24,8 @@ namespace SteamPipes
 			MaxSteam = 1000;
 			MaxWater = 800;
 			HeatConductivity = 2;
-			FlowSourceUnits = new HashSet<SteamUnit>();
+			SteamFlowSourceUnits = new HashSet<SteamUnit>();
+			WaterFlowSourceUnits = new HashSet<SteamUnit>();
 		}
 
 		public SteamUnit UnitAbove
@@ -190,8 +191,10 @@ namespace SteamPipes
 			get { return _horizontalAdjacentConnections; }
 		}
 
-		public HashSet<SteamUnit> FlowSourceUnits { get; private set; }
+		public HashSet<SteamUnit> SteamFlowSourceUnits { get; private set; }
+		public HashSet<SteamUnit> WaterFlowSourceUnits { get; private set; }
 		public decimal NewSteam { get; set; }
+		public decimal NewWater { get; set; }
 
 		public decimal Temperature
 		{
@@ -224,6 +227,7 @@ namespace SteamPipes
 		}
 
 		public decimal MaxWater { get; set; }
+		
 
 		public event EventHandler ConnectionsChanged;
 		public event EventHandler DataChanged;
