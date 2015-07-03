@@ -14,6 +14,7 @@ namespace SteamPipes
 		private SteamUnit _unitRight;
 		private decimal _steamStored;
 		private decimal _temperature;
+		private decimal _waterStored;
 		public int X { get; internal set; }
 		public int Y { get; internal set; }
 
@@ -21,6 +22,7 @@ namespace SteamPipes
 		{
 			SteamStored = 0;
 			MaxSteam = 1000;
+			MaxWater = 800;
 			HeatConductivity = 2;
 			FlowSourceUnits = new HashSet<SteamUnit>();
 		}
@@ -150,12 +152,17 @@ namespace SteamPipes
 
 		public decimal MaxSteam { get; set; }
 
+		public decimal ActualMaxSteam
+		{
+			get { return (1 - (WaterStored/MaxWater))*MaxSteam; }
+		}
+
 		public double SteamDensity
 		{
 			get
 			{
 				double x = (double)SteamStored;
-				double c = (double)MaxSteam;
+				double c = (double)ActualMaxSteam;
 				double a = c / 100;
 				double b = 100 / c;
 				double y = Math.Log10((x + a) * b) * 50;
@@ -201,6 +208,22 @@ namespace SteamPipes
 		}
 
 		public decimal HeatConductivity { get; private set; }
+
+		public decimal WaterStored
+		{
+			get { return _waterStored; }
+			set
+			{
+				if (_waterStored != value)
+				{
+					_waterStored = value;
+					InvokeDataChanged();
+				}
+				
+			}
+		}
+
+		public decimal MaxWater { get; set; }
 
 		public event EventHandler ConnectionsChanged;
 		public event EventHandler DataChanged;

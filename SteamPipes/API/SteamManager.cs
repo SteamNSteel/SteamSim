@@ -12,6 +12,8 @@ namespace SteamPipes
 		private static readonly ConcurrentDictionary<PointI2D, SteamUnit> SteamUnits = new ConcurrentDictionary<PointI2D, SteamUnit>();
 		private static readonly ConcurrentDictionary<PointI2D, ISteamProvider> SteamProviders = new ConcurrentDictionary<PointI2D, ISteamProvider>();
 		private const decimal TransferRatio = 0.8m;
+		private const decimal SteamToWaterRatio = 0.8m;
+		private const decimal CondensationRatePerTick = 0.01m;
 		private const int TicksPerSecond = 20;
 
 		internal static SteamUnit CreateSteamUnit<TType>(int column, int row) where TType : SteamUnit, new()
@@ -182,9 +184,27 @@ namespace SteamPipes
 						
 						TransferSteam(unit, timeElapsed);
 						ProduceSteam(unit, timeElapsed);
+						//TransferWater(unit, timeElapsed);
+						CondenseSteam(unit, timeElapsed);
 					}
 				}
 			}
+		}
+
+		private static void CondenseSteam(SteamUnit unit, decimal timeElapsed)
+		{
+			var usableSteam = unit.SteamStored - unit.NewSteam;
+			if (usableSteam <= 0) return;
+
+			var newCondensation = usableSteam*CondensationRatePerTick*((100-unit.Temperature)/100)*TicksPerSecond*timeElapsed;
+			
+			if (unit.SteamStored - newCondensation < 0)
+			{
+				newCondensation = unit.SteamStored;
+			}
+			var waterGained = newCondensation * SteamToWaterRatio;
+			unit.SteamStored -= newCondensation;
+			unit.WaterStored += waterGained;
 		}
 
 		private static void TransferSteam(SteamUnit unit, decimal timeElapsed)
@@ -226,7 +246,6 @@ namespace SteamPipes
 			{
 				var steamProduced = steamProvider.AmountPerTick*TicksPerSecond*timeElapsed;
 
-				//unit.NewSteam = steamProduced;
 				if (unit.SteamStored + steamProduced > unit.MaxSteam)
 				{
 					steamProduced = unit.MaxSteam - unit.SteamStored;
@@ -262,7 +281,7 @@ namespace SteamPipes
 					continue;
 				}
 				//Steam providers can always push?
-				if (neighbourUnit.SteamStored < neighbourUnit.MaxSteam &&
+				if (neighbourUnit.SteamStored < neighbourUnit.ActualMaxSteam &&
 				    (neighbourUnit.SteamStored < usableSteam || unit is ISteamProvider || neighbourUnit is ISteamConsumer))
 				{
 					eligibleUnits.Add(neighbourUnit);
@@ -273,15 +292,15 @@ namespace SteamPipes
 			var originalSteamStored = usableSteam;
 			foreach (var neighbourUnit in eligibleUnits)
 			{
-				var ratio = (neighbourUnit.MaxSteam - neighbourUnit.SteamStored)/steamSpaceAvailable;
+				var ratio = (neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored) / steamSpaceAvailable;
 
 				var amountTransferred = originalSteamStored*timeElapsed*ratio;
 
-				if (neighbourUnit.SteamStored + amountTransferred > neighbourUnit.MaxSteam)
+				if (neighbourUnit.SteamStored + amountTransferred > neighbourUnit.ActualMaxSteam)
 				{
-					amountTransferred = neighbourUnit.MaxSteam - neighbourUnit.SteamStored;
+					amountTransferred = neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored;
 				}
-				//amountTransferred = Math.Ceiling(amountTransferred * TransferRatio);
+
 				amountTransferred = amountTransferred*TransferRatio;
 				if (unit.SteamStored - amountTransferred < 0)
 				{
@@ -297,18 +316,15 @@ namespace SteamPipes
 
 		private static void TransferSteamAbove(SteamUnit unit, decimal usableSteam, decimal timeElapsed)
 		{
-			if (unit.UnitAbove.SteamStored <= unit.UnitAbove.MaxSteam)
+			if (unit.UnitAbove.SteamStored <= unit.UnitAbove.ActualMaxSteam)
 			{
 				var amountTransferred = usableSteam*timeElapsed;
 
-				if (unit.UnitAbove.SteamStored + amountTransferred > unit.UnitAbove.MaxSteam)
+				if (unit.UnitAbove.SteamStored + amountTransferred > unit.UnitAbove.ActualMaxSteam)
 				{
-					amountTransferred = unit.UnitAbove.MaxSteam - unit.UnitAbove.SteamStored;
+					amountTransferred = unit.UnitAbove.ActualMaxSteam - unit.UnitAbove.SteamStored;
 				}
-
-				//Ignore transfer ratio when going up.
-				//amountTransferred = Math.Ceiling(amountTransferred);
-
+				
 				if (usableSteam - amountTransferred < 0)
 				{
 					amountTransferred = usableSteam;

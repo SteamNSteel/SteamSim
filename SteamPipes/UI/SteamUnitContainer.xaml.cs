@@ -81,9 +81,11 @@ namespace SteamPipes
 					solidColorBrush = Brushes.Tomato;
 				}
 
-				drawingContext.DrawRectangle(Brushes.LightGray, null, new Rect(new Size(RenderSize.Width, RenderSize.Height * SteamUnit.SteamDensity / 100)));
+				var waterUsage = (double)(SteamUnit.WaterStored / SteamUnit.MaxWater);
+				var waterHeightPixels = RenderSize.Height * waterUsage;
+				drawingContext.DrawRectangle(Brushes.LightGray, null, new Rect(new Size(RenderSize.Width, (RenderSize.Height - waterHeightPixels) * SteamUnit.SteamDensity / 100)));
+				drawingContext.DrawRectangle(Brushes.CornflowerBlue, null, new Rect(new Point(0, RenderSize.Height - waterHeightPixels), new Size(RenderSize.Width, waterHeightPixels)));
 				
-
 				if (SteamUnit.UnitAbove != null)
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
@@ -148,11 +150,17 @@ namespace SteamPipes
 				}
 
 				double y = 0;
-				var text = new FormattedText("steam: " + Math.Floor(SteamUnit.SteamStored), CultureInfo.CurrentUICulture,
+				var text = new FormattedText("steam: " + Math.Floor(SteamUnit.SteamStored) + "/" + Math.Floor(SteamUnit.ActualMaxSteam), CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
+
 				y += text.Height + 2;
 				text = new FormattedText("density: " + Math.Floor(SteamUnit.SteamDensity) + '%', CultureInfo.CurrentUICulture,
+					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
+				drawingContext.DrawText(text, new Point(0, y));
+
+				y += text.Height + 2;
+				text = new FormattedText("water: " + Math.Floor(SteamUnit.WaterStored) + "/" + SteamUnit.MaxWater, CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
