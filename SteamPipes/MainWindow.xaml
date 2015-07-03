@@ -3,6 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:steamPipes="clr-namespace:SteamPipes"
         Title="Simulator" Height="487" Width="696">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="PipeButtonBackground" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FFE8AF35" Offset="0"/>
+            <GradientStop Color="#FFD4A846" Offset="0.239"/>
+            <GradientStop Color="#FFE8B648" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="ProducerButtonBackground" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF8EE835" Offset="0"/>
+            <GradientStop Color="#FF66D446" Offset="0.239"/>
+            <GradientStop Color="#FF57E848" Offset="1"/>
+        </LinearGradientBrush>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="171" />
@@ -22,15 +34,15 @@
             </Grid>
             <GroupBox Header="Action">
                 <WrapPanel x:Name="PlaceBlockGroup">
-                    <Button x:Name="ClearButton" Content="Clear" Width="75" Click="CleareButton_OnClick" />
+                    <Button x:Name="ClearButton" Content="Clear" Width="75" Height="50" Click="CleareButton_OnClick" />
                     <Label />
-                    <Button x:Name="PlacePipeButton" Content="Add Pipe" Width="75" Click="PlacePipeButton_Click" Background="SandyBrown" />
-                    <Button x:Name="PlaceBoilerButton" Content="Add Boiler" Width="75" Click="PlaceBoilerButton_Click" Background="Green" />
-                    <Button x:Name="PlaceFurnace" Content="Add Furnace" Width="75" Click="PlaceFurnaceButton_Click" Background="Salmon" />
-                    <Button x:Name="PlaceBallMill" Content="Add Ball Mill" Width="75" Click="PlaceBallMillButton_Click" Background="Salmon"/>
+                    <Button x:Name="PlacePipeButton" Content="Add Pipe" Width="75" Height="50" Click="PlacePipeButton_Click" Background="{DynamicResource PipeButtonBackground}" />
+                    <Button x:Name="PlaceBoilerButton" Content="Add Boiler" Width="75" Height="50" Click="PlaceBoilerButton_Click" Background="{DynamicResource ProducerButtonBackground}" />
+                    <Button x:Name="PlaceFurnace" Content="Add Furnace" Width="75" Height="50" Click="PlaceFurnaceButton_Click" Background="Salmon" />
+                    <Button x:Name="PlaceBallMill" Content="Add Ball Mill" Width="75" Height="50" Click="PlaceBallMillButton_Click" Background="Salmon"/>
                     <!--<Label />-->
-                    <Button x:Name="AddSteamButton" Content="+ Steam" Width="75" Click="AddSteamButton_Click"/>
-                    <Button x:Name="RemoveSteamButton" Content="- Steam" Width="75" Click="RemoveSteamButton_Click"/>
+                    <Button x:Name="AddSteamButton" Content="+ Steam" Width="75" Height="50" Click="AddSteamButton_Click"/>
+                    <Button x:Name="RemoveSteamButton" Content="- Steam" Width="75" Height="50" Click="RemoveSteamButton_Click"/>
                 </WrapPanel>
             </GroupBox>
             <Button x:Name="StepSimulationButton" Content="Step" Margin="0,16,0,0" Click="StepSimulationButton_Click"/>
