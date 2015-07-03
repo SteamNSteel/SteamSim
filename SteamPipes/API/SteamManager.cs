@@ -206,28 +206,17 @@ namespace SteamPipes
 
 		private static void CalculateUnitHeat(SteamUnit unit)
 		{
-			if (unit.SteamStored > 0.1m)
+			var tempDifference = unit.SteamDensity - (double)unit.Temperature;
+			decimal temperature = unit.Temperature + (unit.HeatConductivity * (decimal)(tempDifference / 100));
+			if (temperature > 100)
 			{
-				if (unit.Temperature >= 100)
-				{
-					return;
-				}
-				decimal temperature = unit.Temperature + (unit.HeatConductivity*(unit.SteamStored/unit.MaxSteam));
-				if (temperature > 100)
-				{
-					temperature = 100;
-				}
-				unit.Temperature = temperature;
+				temperature = 100;
 			}
-			else
+			if (temperature < 0)
 			{
-				decimal temperature = unit.Temperature - unit.HeatConductivity*0.1m;
-				if (temperature < 0)
-				{
-					temperature = 0;
-				}
-				unit.Temperature = temperature;
+				temperature = 0;
 			}
+			unit.Temperature = temperature;
 		}
 
 		private static void ProduceSteam(SteamUnit unit, decimal timeElapsed)
@@ -235,7 +224,7 @@ namespace SteamPipes
 			var steamProvider = unit as ISteamProvider;
 			if (steamProvider != null)
 			{
-				var steamProduced = Math.Ceiling(steamProvider.AmountPerTick*TicksPerSecond*timeElapsed);
+				var steamProduced = steamProvider.AmountPerTick*TicksPerSecond*timeElapsed;
 
 				//unit.NewSteam = steamProduced;
 				if (unit.SteamStored + steamProduced > unit.MaxSteam)
@@ -251,7 +240,7 @@ namespace SteamPipes
 			var steamConsumer = unit as ISteamConsumer;
 			if (steamConsumer != null)
 			{
-				var amountConsumed = Math.Ceiling(steamConsumer.AmountPerTick*TicksPerSecond*timeElapsed);
+				var amountConsumed = steamConsumer.AmountPerTick*TicksPerSecond*timeElapsed;
 				if (amountConsumed > unit.SteamStored)
 				{
 					amountConsumed = unit.SteamStored;
