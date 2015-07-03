@@ -80,6 +80,8 @@ namespace SteamPipes
 				{
 					solidColorBrush = Brushes.Tomato;
 				}
+
+				drawingContext.DrawRectangle(Brushes.LightGray, null, new Rect(new Size(RenderSize.Width, RenderSize.Height * SteamUnit.SteamDensity / 100)));
 				
 
 				if (SteamUnit.UnitAbove != null)
