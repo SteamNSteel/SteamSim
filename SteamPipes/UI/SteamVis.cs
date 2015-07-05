@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Media;
 
-namespace SteamPipes
+namespace SteamPipes.UI
 {
 	public class SteamVis : Grid
 	{
@@ -28,9 +25,10 @@ namespace SteamPipes
 
 			for (int i = 0; i < FieldHeight; ++i)
 			{
-				RowDefinitions.Add(new RowDefinition {Height = new GridLength(1, GridUnitType.Star)});
+				RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 			}
-			CreateNewColumns(0, FieldWidth);
+			CreateNewColumns(FieldWidth);
+
 		}
 
 		private void WidthChanged(DependencyPropertyChangedEventArgs args)
@@ -40,7 +38,7 @@ namespace SteamPipes
 
 			if (newValue > oldValue)
 			{
-				CreateNewColumns(oldValue, newValue);
+				CreateNewColumns(newValue);
 			}
 			else
 			{
@@ -58,9 +56,9 @@ namespace SteamPipes
 			}
 		}
 
-		private void CreateNewColumns(int oldValue, int newValue)
+		private void CreateNewColumns(int newValue)
 		{
-			for (var x = oldValue; x < newValue; ++x)
+			for (var x = ColumnDefinitions.Count; x < newValue; ++x)
 			{
 				for (var y = 0; y < FieldHeight; ++y)
 				{
@@ -80,7 +78,7 @@ namespace SteamPipes
 
 			if (newValue > oldValue)
 			{
-				CreateNewRows(oldValue, newValue);
+				CreateNewRows(newValue);
 			}
 			else
 			{
@@ -99,9 +97,9 @@ namespace SteamPipes
 			}
 		}
 
-		private void CreateNewRows(int oldValue, int newValue)
+		private void CreateNewRows(int newValue)
 		{
-			for (var y = oldValue; y < newValue; ++y)
+			for (var y = RowDefinitions.Count; y < newValue; ++y)
 			{
 				for (var x = 0; x < FieldWidth; ++x)
 				{
@@ -112,11 +110,6 @@ namespace SteamPipes
 				}
 				RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 			}
-		}
-
-		protected override void OnRender(DrawingContext drawingContext)
-		{
-			base.OnRender(drawingContext);
 		}
 
 		public static readonly DependencyProperty FieldWidthProperty = DependencyProperty.Register(

@@ -2,25 +2,13 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using SteamPipes.API;
+using SteamPipes.Machines;
 
-namespace SteamPipes
+namespace SteamPipes.UI
 {
-
-	public static class ExtensionMethods
-	{
-		private static Action EmptyDelegate = delegate() { };
-
-		public static void Refresh(this UIElement uiElement)
-		{
-			uiElement.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-		}
-	}
-
-
 	/// <summary>
 	///     Interaction logic for SteamUnitContainer.xaml
 	/// </summary>

@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace SteamPipes
+namespace SteamPipes.API
 {
 	public static class SteamManager
 	{
@@ -161,6 +160,7 @@ namespace SteamPipes
 					steamUnit.SteamFlowSourceUnits.Clear();
 					steamUnit.WaterFlowSourceUnits.Clear();
 					steamUnit.NewSteam = 0;
+					steamUnit.NewWater = 0;
 					unitsToProcess.Enqueue(steamUnit);
 				}
 				while (unitsToProcess.Count > 0)
@@ -178,6 +178,8 @@ namespace SteamPipes
 							{
 								connection.SteamFlowSourceUnits.Clear();
 								connection.NewSteam = 0;
+								connection.WaterFlowSourceUnits.Clear();
+								connection.NewWater = 0;
 								unitsToProcess.Enqueue(connection);
 							}
 						}
@@ -356,7 +358,7 @@ namespace SteamPipes
 			}
 		}
 
-		private static void TransferWaterAcross(SteamUnit unit, decimal usableWater, decimal timeElapsed)
+		private static void TransferWaterAcross(SteamUnit unit, decimal waterUsedAtStart, decimal timeElapsed)
 		{
 			List<SteamUnit> eligibleUnits = new List<SteamUnit>();
 			decimal waterSpaceAvailable = 0;
@@ -368,14 +370,14 @@ namespace SteamPipes
 				}
 				//Steam providers can always push?
 				if (neighbourUnit.WaterStored < neighbourUnit.MaxWater &&
-					(neighbourUnit.WaterStored < usableWater))
+					(neighbourUnit.WaterStored < waterUsedAtStart))
 				{
 					eligibleUnits.Add(neighbourUnit);
 					waterSpaceAvailable += (neighbourUnit.MaxWater - neighbourUnit.WaterStored);
 				}
 			}
 
-			var originalWaterStored = usableWater;
+			var originalWaterStored = waterUsedAtStart;
 			foreach (var neighbourUnit in eligibleUnits)
 			{
 				var ratio = (neighbourUnit.MaxWater - neighbourUnit.WaterStored) / waterSpaceAvailable;
@@ -387,7 +389,7 @@ namespace SteamPipes
 					amountTransferred = neighbourUnit.MaxWater - neighbourUnit.WaterStored;
 				}
 
-				amountTransferred = amountTransferred * TransferRatio;
+				//1amountTransferred = amountTransferred * 1;
 				if (unit.WaterStored - amountTransferred < 0)
 				{
 					amountTransferred = unit.WaterStored;

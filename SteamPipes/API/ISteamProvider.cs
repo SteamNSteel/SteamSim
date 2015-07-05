@@ -1,4 +1,4 @@
-namespace SteamPipes
+namespace SteamPipes.API
 {
 	public interface ISteamProvider
 	{

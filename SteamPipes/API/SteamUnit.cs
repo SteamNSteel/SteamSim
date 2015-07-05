@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Windows.Documents;
 
-namespace SteamPipes
+namespace SteamPipes.API
 {
 	public class SteamUnit
 	{

@@ -1,4 +1,6 @@
-﻿namespace SteamPipes.API
+﻿using SteamPipes.API;
+
+namespace SteamPipes.Machines
 {
 	public class Furnace : SteamUnit, ISteamConsumer
 	{

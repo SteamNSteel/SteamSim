@@ -1,4 +1,4 @@
-﻿namespace SteamPipes
+﻿namespace SteamPipes.UI
 {
 	public enum ClickBehaviour
 	{
