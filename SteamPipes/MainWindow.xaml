@@ -6,19 +6,19 @@
         Title="Simulator" Height="720" Width="1280">
     <Window.Resources>
         <LinearGradientBrush x:Key="PipeButtonBackground" EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#FFE8AF35" Offset="0"/>
-            <GradientStop Color="#FFD4A846" Offset="0.239"/>
-            <GradientStop Color="#FFE8B648" Offset="1"/>
+            <GradientStop Color="#FFE8AF35" Offset="0" />
+            <GradientStop Color="#FFD4A846" Offset="0.239" />
+            <GradientStop Color="#FFE8B648" Offset="1" />
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="ProducerButtonBackground" EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#FF8EE835" Offset="0"/>
-            <GradientStop Color="#FF66D446" Offset="0.239"/>
-            <GradientStop Color="#FF57E848" Offset="1"/>
+            <GradientStop Color="#FF8EE835" Offset="0" />
+            <GradientStop Color="#FF66D446" Offset="0.239" />
+            <GradientStop Color="#FF57E848" Offset="1" />
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="ConsumerButtonBackground" EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#FFE83535" Offset="0"/>
-            <GradientStop Color="#FFD44646" Offset="0.239"/>
-            <GradientStop Color="#FFE84848" Offset="1"/>
+            <GradientStop Color="#FFE83535" Offset="0" />
+            <GradientStop Color="#FFD44646" Offset="0.239" />
+            <GradientStop Color="#FFE84848" Offset="1" />
         </LinearGradientBrush>
     </Window.Resources>
     <Grid>
@@ -31,32 +31,37 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <ui:UpDownControl Value="{Binding FieldWidth, ElementName=SteamVisual, Mode=TwoWay}"  />
-                <TextBlock Grid.Column="1" Text="x" Margin="4"/>
+                <ui:UpDownControl Value="{Binding FieldWidth, ElementName=SteamVisual, Mode=TwoWay}" />
+                <TextBlock Grid.Column="1" Text="x" Margin="4" />
                 <ui:UpDownControl Grid.Column="2" Value="{Binding FieldHeight, ElementName=SteamVisual, Mode=TwoWay}" />
             </Grid>
             <GroupBox Header="Action">
                 <WrapPanel x:Name="PlaceBlockGroup">
                     <Button x:Name="ClearButton" Content="Clear" Width="75" Height="50" Click="CleareButton_OnClick" />
-                    <Label Width="75"/>
-                    <Label Width="75" Height="10" Content=" "/>
-                    <Label Width="75"/>
-                    <Button x:Name="PlacePipeButton" Content="Add Pipe" Width="75" Height="50" Click="PlacePipeButton_Click" Background="{DynamicResource PipeButtonBackground}" />
-                    <Button x:Name="PlaceBoilerButton" Content="Add Boiler" Width="75" Height="50" Click="PlaceBoilerButton_Click" Background="{DynamicResource ProducerButtonBackground}" />
-                    <Button x:Name="PlaceFurnace" Content="Add Furnace" Width="75" Height="50" Click="PlaceFurnaceButton_Click" Background="{DynamicResource ConsumerButtonBackground}" >
-                    </Button>
-                    <Button x:Name="PlaceBallMill" Content="Add Ball Mill" Width="75" Height="50" Click="PlaceBallMillButton_Click" Background="{DynamicResource ConsumerButtonBackground}"/>
+                    <Label Width="75" />
+                    <Label Width="75" Height="10" Content=" " />
+                    <Label Width="75" />
+                    <Button x:Name="PlacePipeButton" Content="Add Pipe" Width="75" Height="50"
+                            Click="PlacePipeButton_Click" Background="{DynamicResource PipeButtonBackground}" />
+                    <Button x:Name="PlaceBoilerButton" Content="Add Boiler" Width="75" Height="50"
+                            Click="PlaceBoilerButton_Click" Background="{DynamicResource ProducerButtonBackground}" />
+                    <Button x:Name="PlaceFurnace" Content="Add Furnace" Width="75" Height="50"
+                            Click="PlaceFurnaceButton_Click" Background="{DynamicResource ConsumerButtonBackground}" />
+                    <Button x:Name="PlaceBallMill" Content="Add Ball Mill" Width="75" Height="50"
+                            Click="PlaceBallMillButton_Click" Background="{DynamicResource ConsumerButtonBackground}" />
                     <!--<Label />-->
-                    <Label Width="75" Height="10" Content=" "/>
-                    <Label Width="75"/>
-                    <Button x:Name="AddSteamButton" Content="+ Steam" Width="75" Height="50" Click="AddSteamButton_Click"/>
-                    <Button x:Name="RemoveSteamButton" Content="- Steam" Width="75" Height="50" Click="RemoveSteamButton_Click"/>
+                    <Label Width="75" Height="10" Content=" " />
+                    <Label Width="75" />
+                    <Button x:Name="AddSteamButton" Content="+ Steam" Width="75" Height="50"
+                            Click="AddSteamButton_Click" />
+                    <Button x:Name="RemoveSteamButton" Content="- Steam" Width="75" Height="50"
+                            Click="RemoveSteamButton_Click" />
                 </WrapPanel>
             </GroupBox>
-            <Button x:Name="StepSimulationButton" Content="Step" Margin="0,16,0,0" Click="StepSimulationButton_Click"/>
+            <Button x:Name="StepSimulationButton" Content="Step" Margin="0,16,0,0" Click="StepSimulationButton_Click" />
         </StackPanel>
     </Grid>
 </Window>

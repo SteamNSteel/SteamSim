@@ -23,12 +23,11 @@ namespace SteamPipes.UI
 		{
 			base.OnInitialized(e);
 
-			for (int i = 0; i < FieldHeight; ++i)
+			for (var i = 0; i < FieldHeight; ++i)
 			{
-				RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+				RowDefinitions.Add(new RowDefinition {Height = new GridLength(1, GridUnitType.Star)});
 			}
 			CreateNewColumns(FieldWidth);
-
 		}
 
 		private void WidthChanged(DependencyPropertyChangedEventArgs args)
@@ -43,7 +42,8 @@ namespace SteamPipes.UI
 			else
 			{
 				var itemsToRemove = from item in Children.OfType<SteamUnitContainer>()
-									where GetColumn(item) >= newValue select item;
+					where GetColumn(item) >= newValue
+					select item;
 				foreach (var item in itemsToRemove.ToList())
 				{
 					item.RemovePipe();
@@ -67,14 +67,14 @@ namespace SteamPipes.UI
 					SetRow(newContainer, y);
 					Children.Add(newContainer);
 				}
-				ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+				ColumnDefinitions.Add(new ColumnDefinition {Width = new GridLength(1, GridUnitType.Star)});
 			}
 		}
 
 		private void HeightChanged(DependencyPropertyChangedEventArgs args)
 		{
-			var oldValue = (int)args.OldValue;
-			var newValue = (int)args.NewValue;
+			var oldValue = (int) args.OldValue;
+			var newValue = (int) args.NewValue;
 
 			if (newValue > oldValue)
 			{
@@ -83,8 +83,8 @@ namespace SteamPipes.UI
 			else
 			{
 				var itemsToRemove = from item in Children.OfType<SteamUnitContainer>()
-									where GetRow(item) >= newValue
-									select item;
+					where GetRow(item) >= newValue
+					select item;
 				foreach (var item in itemsToRemove.ToList())
 				{
 					item.RemovePipe();
@@ -108,7 +108,7 @@ namespace SteamPipes.UI
 					SetRow(newContainer, y);
 					Children.Add(newContainer);
 				}
-				RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+				RowDefinitions.Add(new RowDefinition {Height = new GridLength(1, GridUnitType.Star)});
 			}
 		}
 
@@ -117,7 +117,7 @@ namespace SteamPipes.UI
 			new PropertyMetadata(7, (o, args) => ((SteamVis) o).WidthChanged(args)));
 
 		public static readonly DependencyProperty FieldHeightProperty = DependencyProperty.Register(
-			"FieldHeight", typeof (int), typeof (SteamVis), 
-			new PropertyMetadata(6, (o, args) => ((SteamVis)o).HeightChanged(args)));
+			"FieldHeight", typeof (int), typeof (SteamVis),
+			new PropertyMetadata(6, (o, args) => ((SteamVis) o).HeightChanged(args)));
 	}
 }

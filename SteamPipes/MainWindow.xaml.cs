@@ -1,24 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using SteamPipes.API;
 using SteamPipes.UI;
 
 namespace SteamPipes
 {
 	/// <summary>
-	/// Interaction logic for MainWindow.xaml
+	///     Interaction logic for MainWindow.xaml
 	/// </summary>
 	public partial class MainWindow : Window
 	{
@@ -32,8 +24,6 @@ namespace SteamPipes
 			SteamManager.StartSimulationThread();
 		}
 
-
-
 		private void ToggleButton(Button theButton)
 		{
 			theButton.IsEnabled = false;
@@ -45,13 +35,13 @@ namespace SteamPipes
 
 		private void PlacePipeButton_Click(object sender, RoutedEventArgs e)
 		{
-			ToggleButton((Button)sender);
+			ToggleButton((Button) sender);
 			_clickBehaviour = ClickBehaviour.PlaceBlock;
 		}
 
 		private void CleareButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			ToggleButton((Button)sender);
+			ToggleButton((Button) sender);
 			_clickBehaviour = ClickBehaviour.Clear;
 		}
 
@@ -89,15 +79,13 @@ namespace SteamPipes
 
 		private void AddSteamButton_Click(object sender, RoutedEventArgs e)
 		{
-
-			ToggleButton((Button)sender);
+			ToggleButton((Button) sender);
 			_clickBehaviour = ClickBehaviour.AddSteam;
 		}
 
 		private void RemoveSteamButton_Click(object sender, RoutedEventArgs e)
 		{
-
-			ToggleButton((Button)sender);
+			ToggleButton((Button) sender);
 			_clickBehaviour = ClickBehaviour.RemoveSteam;
 		}
 
@@ -108,19 +96,19 @@ namespace SteamPipes
 
 		private void PlaceBoilerButton_Click(object sender, RoutedEventArgs e)
 		{
-			ToggleButton((Button)sender);
+			ToggleButton((Button) sender);
 			_clickBehaviour = ClickBehaviour.PlaceBoiler;
 		}
 
 		private void PlaceFurnaceButton_Click(object sender, RoutedEventArgs e)
 		{
-			ToggleButton((Button)sender);
+			ToggleButton((Button) sender);
 			_clickBehaviour = ClickBehaviour.PlaceFurnace;
 		}
 
 		private void PlaceBallMillButton_Click(object sender, RoutedEventArgs e)
 		{
-			ToggleButton((Button)sender);
+			ToggleButton((Button) sender);
 			_clickBehaviour = ClickBehaviour.PlaceBallMill;
 		}
 

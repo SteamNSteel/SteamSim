@@ -8,12 +8,21 @@ namespace SteamPipes.API
 {
 	public static class SteamManager
 	{
-		private static readonly ConcurrentDictionary<PointI2D, SteamUnit> SteamUnits = new ConcurrentDictionary<PointI2D, SteamUnit>();
-		private static readonly ConcurrentDictionary<PointI2D, ISteamProvider> SteamProviders = new ConcurrentDictionary<PointI2D, ISteamProvider>();
 		private const decimal TransferRatio = 0.8m;
 		private const decimal SteamToWaterRatio = 0.8m;
 		private const decimal CondensationRatePerTick = 0.01m;
 		private const int TicksPerSecond = 20;
+
+		private static readonly ConcurrentDictionary<PointI2D, SteamUnit> SteamUnits =
+			new ConcurrentDictionary<PointI2D, SteamUnit>();
+
+		private static readonly ConcurrentDictionary<PointI2D, ISteamProvider> SteamProviders =
+			new ConcurrentDictionary<PointI2D, ISteamProvider>();
+
+		private static int _currentStep;
+		private static long _previousTick = Stopwatch.GetTimestamp();
+		private static readonly bool paused = false;
+		private static bool running = true;
 
 		internal static SteamUnit CreateSteamUnit<TType>(int column, int row) where TType : SteamUnit, new()
 		{
@@ -60,8 +69,9 @@ namespace SteamPipes.API
 				}
 			}
 			SteamUnits.TryAdd(point, steamUnit);
-			if (steamUnit is ISteamProvider) { 
-				SteamProviders.TryAdd(point, (ISteamProvider)steamUnit);
+			if (steamUnit is ISteamProvider)
+			{
+				SteamProviders.TryAdd(point, (ISteamProvider) steamUnit);
 			}
 			return steamUnit;
 		}
@@ -106,14 +116,12 @@ namespace SteamPipes.API
 			SteamProviders.TryRemove(point, out removedProvider);
 		}
 
-
 		public static void InjectSteam(long amount, SteamUnit steamUnit)
 		{
 			if (steamUnit.SteamStored + amount <= steamUnit.MaxSteam)
 			{
 				steamUnit.SteamStored += amount;
 			}
-			
 		}
 
 		public static void RemoveSteam(long amount, SteamUnit steamUnit)
@@ -128,25 +136,20 @@ namespace SteamPipes.API
 			}
 		}
 
-		private static int _currentStep;
-		private static long _previousTick = Stopwatch.GetTimestamp();
-
 		public static void StepSimulation(decimal timeElapsed)
 		{
-			
-
 			_currentStep++;
 
-			HashSet<SteamUnit> unprocessedUnits = new HashSet<SteamUnit>(SteamUnits.Values);
+			var unprocessedUnits = new HashSet<SteamUnit>(SteamUnits.Values);
 			//Ideally this would be prepopulated with all the sources.
 
-			Queue<SteamUnit> unitsToProcess = new Queue<SteamUnit>();
+			var unitsToProcess = new Queue<SteamUnit>();
 			foreach (var steamProvider in SteamProviders.Values)
 			{
-				SteamUnit unit = (SteamUnit)steamProvider;
+				var unit = (SteamUnit) steamProvider;
 				unit.SteamFlowSourceUnits.Clear();
 				unit.WaterFlowSourceUnits.Clear();
-				
+
 				unitsToProcess.Enqueue(unit);
 			}
 
@@ -170,7 +173,7 @@ namespace SteamPipes.API
 					{
 						unprocessedUnits.Remove(unit);
 						if (unit.ProcessPass == _currentStep) continue; //Already processed.
-						
+
 						unit.ProcessPass = _currentStep;
 						foreach (var connection in unit.AllAdjacentConnections)
 						{
@@ -185,7 +188,7 @@ namespace SteamPipes.API
 						}
 
 						if (ConsumeSteam(unit, timeElapsed)) continue;
-						
+
 						TransferSteam(unit, timeElapsed);
 						CalculateUnitHeat(unit);
 						ProduceSteam(unit, timeElapsed);
@@ -201,21 +204,21 @@ namespace SteamPipes.API
 			var usableSteam = unit.SteamStored - unit.NewSteam;
 			if (usableSteam <= 0) return;
 
-			var newCondensation = usableSteam*CondensationRatePerTick*((100-unit.Temperature)/100)*TicksPerSecond*timeElapsed;
-			
+			var newCondensation = usableSteam*CondensationRatePerTick*((100 - unit.Temperature)/100)*TicksPerSecond*timeElapsed;
+
 			if (unit.SteamStored - newCondensation < 0)
 			{
 				newCondensation = unit.SteamStored;
 			}
-			var waterGained = newCondensation * SteamToWaterRatio;
+			var waterGained = newCondensation*SteamToWaterRatio;
 			unit.SteamStored -= newCondensation;
 			unit.WaterStored += waterGained;
 		}
-		
+
 		private static void CalculateUnitHeat(SteamUnit unit)
 		{
-			var tempDifference = unit.SteamDensity - (double)unit.Temperature;
-			decimal temperature = unit.Temperature + (unit.HeatConductivity * (decimal)(tempDifference / 100));
+			var tempDifference = unit.SteamDensity - (double) unit.Temperature;
+			var temperature = unit.Temperature + (unit.HeatConductivity*(decimal) (tempDifference/100));
 			if (temperature > 100)
 			{
 				temperature = 100;
@@ -272,12 +275,11 @@ namespace SteamPipes.API
 			{
 				TransferSteamAcross(unit, usableSteam, timeElapsed);
 			}
-
 		}
 
 		private static void TransferSteamAcross(SteamUnit unit, decimal usableSteam, decimal timeElapsed)
 		{
-			List<SteamUnit> eligibleUnits = new List<SteamUnit>();
+			var eligibleUnits = new List<SteamUnit>();
 			decimal steamSpaceAvailable = 0;
 			foreach (var neighbourUnit in unit.HorizontalAdjacentConnections)
 			{
@@ -297,7 +299,7 @@ namespace SteamPipes.API
 			var originalSteamStored = usableSteam;
 			foreach (var neighbourUnit in eligibleUnits)
 			{
-				var ratio = (neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored) / steamSpaceAvailable;
+				var ratio = (neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored)/steamSpaceAvailable;
 
 				var amountTransferred = originalSteamStored*timeElapsed*ratio;
 
@@ -330,7 +332,7 @@ namespace SteamPipes.API
 				{
 					amountTransferred = unitAbove.ActualMaxSteam - unitAbove.SteamStored;
 				}
-				
+
 				if (usableSteam - amountTransferred < 0)
 				{
 					amountTransferred = usableSteam;
@@ -360,7 +362,7 @@ namespace SteamPipes.API
 
 		private static void TransferWaterAcross(SteamUnit unit, decimal waterUsedAtStart, decimal timeElapsed)
 		{
-			List<SteamUnit> eligibleUnits = new List<SteamUnit>();
+			var eligibleUnits = new List<SteamUnit>();
 			decimal waterSpaceAvailable = 0;
 			foreach (var neighbourUnit in unit.HorizontalAdjacentConnections)
 			{
@@ -370,7 +372,7 @@ namespace SteamPipes.API
 				}
 				//Steam providers can always push?
 				if (neighbourUnit.WaterStored < neighbourUnit.MaxWater &&
-					(neighbourUnit.WaterStored < waterUsedAtStart))
+				    (neighbourUnit.WaterStored < waterUsedAtStart))
 				{
 					eligibleUnits.Add(neighbourUnit);
 					waterSpaceAvailable += (neighbourUnit.MaxWater - neighbourUnit.WaterStored);
@@ -380,9 +382,9 @@ namespace SteamPipes.API
 			var originalWaterStored = waterUsedAtStart;
 			foreach (var neighbourUnit in eligibleUnits)
 			{
-				var ratio = (neighbourUnit.MaxWater - neighbourUnit.WaterStored) / waterSpaceAvailable;
+				var ratio = (neighbourUnit.MaxWater - neighbourUnit.WaterStored)/waterSpaceAvailable;
 
-				var amountTransferred = originalWaterStored * timeElapsed * ratio;
+				var amountTransferred = originalWaterStored*timeElapsed*ratio;
 
 				if (neighbourUnit.WaterStored + amountTransferred > neighbourUnit.MaxWater)
 				{
@@ -407,7 +409,7 @@ namespace SteamPipes.API
 			var unitBelow = unit.UnitBelow;
 			if (unitBelow.WaterStored <= unitBelow.MaxWater)
 			{
-				var amountTransferred = usableWater * timeElapsed;
+				var amountTransferred = usableWater*timeElapsed;
 
 				if (unitBelow.WaterStored + amountTransferred > unitBelow.MaxWater)
 				{
@@ -425,15 +427,12 @@ namespace SteamPipes.API
 			}
 		}
 
-
 		public static void StartSimulationThread()
 		{
-			Thread thread = new Thread(Start) {Name = "Simluation Thread"};
+			var thread = new Thread(Start) {Name = "Simluation Thread"};
 			thread.Start();
 		}
 
-		private static bool paused = false;
-		private static bool running = true;
 		private static void Start()
 		{
 			_previousTick = Stopwatch.GetTimestamp();
@@ -442,7 +441,7 @@ namespace SteamPipes.API
 				if (!paused)
 				{
 					var thisTick = Stopwatch.GetTimestamp();
-					var timeElapsed = (thisTick - _previousTick) / (decimal)Stopwatch.Frequency;
+					var timeElapsed = (thisTick - _previousTick)/(decimal) Stopwatch.Frequency;
 					if (timeElapsed > 1) timeElapsed = 1;
 					_previousTick = thisTick;
 
