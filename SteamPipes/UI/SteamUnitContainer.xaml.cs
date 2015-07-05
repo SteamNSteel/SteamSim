@@ -23,26 +23,12 @@ namespace SteamPipes.UI
 
 		private void SteamUnitOnConnectionsChanged(object sender, EventArgs eventArgs)
 		{
-			//Dispatcher.BeginInvoke(new Action(InvalidateVisual));
-			//this.Refresh();
-			Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(
-				() =>
-				{
-					InvalidateVisual();
-				}
-				));
+			Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(InvalidateVisual));
 		}
 
 		private void SteamUnitDataChanged(object sender, EventArgs e)
 		{
-			//Dispatcher.BeginInvoke(new Action(InvalidateVisual));
-			//this.Refresh();
-			Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(
-				() =>
-				{
-					InvalidateVisual();
-				}
-				));
+			Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(InvalidateVisual));
 		}
 
 		protected override void OnRender(DrawingContext drawingContext)
@@ -57,8 +43,6 @@ namespace SteamPipes.UI
 				//TODO: Vary colour by pipe temperature
 				drawingContext.DrawRoundedRectangle(Brushes.Transparent, new Pen(Brushes.Red, 2), new Rect(RenderSize), 5, 5);
 
-
-
 				var solidColorBrush = Brushes.SandyBrown;
 				if (SteamUnit is ISteamProvider)
 				{
@@ -69,11 +53,13 @@ namespace SteamPipes.UI
 					solidColorBrush = Brushes.Tomato;
 				}
 
-				var waterUsage = (double)(SteamUnit.WaterStored / SteamUnit.MaxWater);
-				var waterHeightPixels = RenderSize.Height * waterUsage;
-				drawingContext.DrawRectangle(Brushes.LightGray, null, new Rect(new Size(RenderSize.Width, (RenderSize.Height - waterHeightPixels) * SteamUnit.SteamDensity / 100)));
-				drawingContext.DrawRectangle(Brushes.CornflowerBlue, null, new Rect(new Point(0, RenderSize.Height - waterHeightPixels), new Size(RenderSize.Width, waterHeightPixels)));
-				
+				var waterUsage = (double) (SteamUnit.WaterStored/SteamUnit.MaxWater);
+				var waterHeightPixels = RenderSize.Height*waterUsage;
+				drawingContext.DrawRectangle(Brushes.LightGray, null,
+					new Rect(new Size(RenderSize.Width, (RenderSize.Height - waterHeightPixels)*SteamUnit.SteamDensity/100)));
+				drawingContext.DrawRectangle(Brushes.CornflowerBlue, null,
+					new Rect(new Point(0, RenderSize.Height - waterHeightPixels), new Size(RenderSize.Width, waterHeightPixels)));
+
 				if (SteamUnit.UnitAbove != null)
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
@@ -86,8 +72,8 @@ namespace SteamPipes.UI
 				else
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
-						new Point(RenderSize.Width * 1 / 4, RenderSize.Height * 1 / 4),
-						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 1 / 4));
+						new Point(RenderSize.Width*1/4, RenderSize.Height*1/4),
+						new Point(RenderSize.Width*3/4, RenderSize.Height*1/4));
 				}
 
 				if (SteamUnit.UnitBelow != null)
@@ -102,8 +88,8 @@ namespace SteamPipes.UI
 				else
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
-						new Point(RenderSize.Width * 1 / 4, RenderSize.Height * 3 / 4),
-						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 3 / 4));
+						new Point(RenderSize.Width*1/4, RenderSize.Height*3/4),
+						new Point(RenderSize.Width*3/4, RenderSize.Height*3/4));
 				}
 
 				if (SteamUnit.UnitLeft != null)
@@ -118,8 +104,8 @@ namespace SteamPipes.UI
 				else
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
-						new Point(RenderSize.Width * 1 / 4, RenderSize.Height * 1 / 4),
-						new Point(RenderSize.Width * 1 / 4, RenderSize.Height * 3 / 4));
+						new Point(RenderSize.Width*1/4, RenderSize.Height*1/4),
+						new Point(RenderSize.Width*1/4, RenderSize.Height*3/4));
 				}
 				if (SteamUnit.UnitRight != null)
 				{
@@ -133,13 +119,15 @@ namespace SteamPipes.UI
 				else
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
-						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 1 / 4),
-						new Point(RenderSize.Width * 3 / 4, RenderSize.Height * 3 / 4));
+						new Point(RenderSize.Width*3/4, RenderSize.Height*1/4),
+						new Point(RenderSize.Width*3/4, RenderSize.Height*3/4));
 				}
 
 				double y = 0;
-				var text = new FormattedText("steam: " + Math.Floor(SteamUnit.SteamStored) + "/" + Math.Floor(SteamUnit.ActualMaxSteam), CultureInfo.CurrentUICulture,
-					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
+				var text =
+					new FormattedText("steam: " + Math.Floor(SteamUnit.SteamStored) + "/" + Math.Floor(SteamUnit.ActualMaxSteam),
+						CultureInfo.CurrentUICulture,
+						FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
@@ -148,7 +136,8 @@ namespace SteamPipes.UI
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText("water: " + Math.Floor(SteamUnit.WaterStored) + "/" + SteamUnit.MaxWater, CultureInfo.CurrentUICulture,
+				text = new FormattedText("water: " + Math.Floor(SteamUnit.WaterStored) + "/" + SteamUnit.MaxWater,
+					CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
@@ -206,7 +195,7 @@ namespace SteamPipes.UI
 		{
 			PlaceSteamUnit<Furnace>();
 		}
-		
+
 		private void PlaceSteamUnit<T>() where T : SteamUnit, new()
 		{
 			if (SteamUnit != null && (!(SteamUnit is T)))
