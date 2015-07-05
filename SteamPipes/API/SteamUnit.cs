@@ -143,6 +143,11 @@ namespace SteamPipes.API
 		{
 			get
 			{
+				if (ActualMaxSteam <= 0)
+				{
+					return SteamStored > 0 ? 100 : 0;
+				}
+
 				var x = (double) SteamStored;
 				var c = (double) ActualMaxSteam;
 				var a = c/100;

@@ -55,8 +55,10 @@ namespace SteamPipes.UI
 
 				var waterUsage = (double) (SteamUnit.WaterStored/SteamUnit.MaxWater);
 				var waterHeightPixels = RenderSize.Height*waterUsage;
+				var steamRenderHeight = Math.Max(0, (RenderSize.Height - waterHeightPixels)*SteamUnit.SteamDensity/100);
+				
 				drawingContext.DrawRectangle(Brushes.LightGray, null,
-					new Rect(new Size(RenderSize.Width, (RenderSize.Height - waterHeightPixels)*SteamUnit.SteamDensity/100)));
+					new Rect(new Size(RenderSize.Width, steamRenderHeight)));
 				drawingContext.DrawRectangle(Brushes.CornflowerBlue, null,
 					new Rect(new Point(0, RenderSize.Height - waterHeightPixels), new Size(RenderSize.Width, waterHeightPixels)));
 
