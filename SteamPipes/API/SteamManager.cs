@@ -237,9 +237,9 @@ namespace SteamPipes.API
 			{
 				var steamProduced = steamProvider.AmountPerTick*TicksPerSecond*timeElapsed;
 
-				if (unit.SteamStored + steamProduced > unit.MaxSteam)
+				if (unit.SteamStored + steamProduced > unit.ActualMaxSteam)
 				{
-					steamProduced = unit.MaxSteam - unit.SteamStored;
+					steamProduced = unit.ActualMaxSteam - unit.SteamStored;
 				}
 				unit.SteamStored += steamProduced;
 			}
@@ -391,7 +391,6 @@ namespace SteamPipes.API
 					amountTransferred = neighbourUnit.MaxWater - neighbourUnit.WaterStored;
 				}
 
-				//1amountTransferred = amountTransferred * 1;
 				if (unit.WaterStored - amountTransferred < 0)
 				{
 					amountTransferred = unit.WaterStored;
@@ -429,7 +428,7 @@ namespace SteamPipes.API
 
 		public static void StartSimulationThread()
 		{
-			var thread = new Thread(Start) {Name = "Simluation Thread"};
+			var thread = new Thread(Start) {Name = "Simulation Thread"};
 			thread.Start();
 		}
 
