@@ -211,6 +211,7 @@ namespace SteamPipes.API
 		}
 
 		public decimal MaxWater { get; set; }
+		public bool Debug { get; set; }
 
 		private void InvokeConnectionsChanged()
 		{

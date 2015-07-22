@@ -23,6 +23,7 @@ namespace SteamPipes.API
 		private static long _previousTick = Stopwatch.GetTimestamp();
 		private static readonly bool paused = false;
 		private static bool running = true;
+		private static double EQUILIBRIUM = 75;
 
 		internal static SteamUnit CreateSteamUnit<TType>(int column, int row) where TType : SteamUnit, new()
 		{
@@ -271,7 +272,7 @@ namespace SteamPipes.API
 			{
 				TransferSteamAbove(unit, usableSteam, timeElapsed);
 			}
-			if (usableSteam > 0 && unit.HorizontalAdjacentConnections.Any())
+			if (usableSteam > 0)
 			{
 				TransferSteamAcross(unit, usableSteam, timeElapsed);
 			}
@@ -288,6 +289,17 @@ namespace SteamPipes.API
 					continue;
 				}
 				//Steam providers can always push?
+				if (neighbourUnit.SteamStored < neighbourUnit.ActualMaxSteam &&
+				    (neighbourUnit.SteamStored < usableSteam || unit is ISteamProvider || neighbourUnit is ISteamConsumer))
+				{
+					eligibleUnits.Add(neighbourUnit);
+					steamSpaceAvailable += (neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored);
+				}
+			}
+
+			if (unit.UnitBelow != null && unit.SteamDensity >= EQUILIBRIUM && !unit.SteamFlowSourceUnits.Contains(unit.UnitBelow))
+			{
+				var neighbourUnit = unit.UnitBelow;
 				if (neighbourUnit.SteamStored < neighbourUnit.ActualMaxSteam &&
 				    (neighbourUnit.SteamStored < usableSteam || unit is ISteamProvider || neighbourUnit is ISteamConsumer))
 				{

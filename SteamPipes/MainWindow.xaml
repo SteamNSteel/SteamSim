@@ -41,7 +41,8 @@
             <GroupBox Header="Action">
                 <WrapPanel x:Name="PlaceBlockGroup">
                     <Button x:Name="ClearButton" Content="Clear" Width="75" Height="50" Click="CleareButton_OnClick" />
-                    <Label Width="75" />
+                    <Button x:Name="DebugButton" Content="Debug" Width="75" Height="50" Click="DebugButton_OnClick" />
+                    <!--<Label Width="75" />-->
                     <Label Width="75" Height="10" Content=" " />
                     <Label Width="75" />
                     <Button x:Name="PlacePipeButton" Content="Add Pipe" Width="75" Height="50"

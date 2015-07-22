@@ -3,8 +3,9 @@
 	public enum ClickBehaviour
 	{
 		None,
-		PlaceBlock,
 		Clear,
+		ToggleDebug,
+		PlaceBlock,
 		AddSteam,
 		RemoveSteam,
 		PlaceBoiler,
