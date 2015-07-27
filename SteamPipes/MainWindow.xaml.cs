@@ -58,6 +58,9 @@ namespace SteamPipes
 					case ClickBehaviour.Clear:
 						objectIdentified.RemovePipe();
 						break;
+					case ClickBehaviour.ToggleDebug:
+						objectIdentified.ToggleDebug();
+						break;
 					case ClickBehaviour.AddSteam:
 						objectIdentified.InjectSteam(100);
 						break;
@@ -116,6 +119,12 @@ namespace SteamPipes
 		{
 			base.OnClosed(e);
 			SteamManager.Stop();
+		}
+
+		private void DebugButton_OnClick(object sender, RoutedEventArgs e)
+		{
+			ToggleButton((Button)sender);
+			_clickBehaviour = ClickBehaviour.ToggleDebug;
 		}
 	}
 }

@@ -40,8 +40,12 @@ namespace SteamPipes.UI
 			}
 			else
 			{
+				//if (SteamUnit.Debug)
 				//TODO: Vary colour by pipe temperature
-				drawingContext.DrawRoundedRectangle(Brushes.Transparent, new Pen(Brushes.Red, 2), new Rect(RenderSize), 5, 5);
+				//{
+					var colorBrush = SteamUnit.Debug ? Brushes.Red : Brushes.Blue;
+					drawingContext.DrawRoundedRectangle(Brushes.Transparent, new Pen(colorBrush, 2), new Rect(RenderSize), 5, 5);
+				//}
 
 				var solidColorBrush = Brushes.SandyBrown;
 				if (SteamUnit is ISteamProvider)
@@ -196,6 +200,14 @@ namespace SteamPipes.UI
 		public void PlaceFurnace()
 		{
 			PlaceSteamUnit<Furnace>();
+		}
+
+		public void ToggleDebug()
+		{
+			if (SteamUnit != null)
+			{
+				SteamUnit.Debug = !SteamUnit.Debug;
+			}
 		}
 
 		private void PlaceSteamUnit<T>() where T : SteamUnit, new()
