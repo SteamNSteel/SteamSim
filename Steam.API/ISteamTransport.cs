@@ -12,6 +12,25 @@
 
         void SetMaximumSteam(int maximumUnitsOfSteam);
 
-        void SetMaximumCondensate(int maxumimUnitsOfWater);
+        void SetMaximumCondensate(int maximimUnitsOfWater);
+
+        void ToggleDebug();
+
+        bool GetShouldDebug();
+        int GetSteamStored();
+        int GetWaterStored();
+        int GetMaximumWater();
+
+        int GetMaximumSteam();
+        double GetCalculatedSteamDensity();
+        int GetCalculatedMaximumSteam();
+        double GetTemperature();
+        
+
+        bool CanTransportAbove();
+        bool CanTransportBelow();
+        bool CanTransportWest();
+        bool CanTransportEast();
+
     }
-}
+}   

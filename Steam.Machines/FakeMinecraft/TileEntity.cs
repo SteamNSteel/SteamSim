@@ -2,8 +2,8 @@
 {
     public class TileEntity
     {
-        private int _x;
-        private int _y;
+        protected int _x;
+        protected int _y;
 
 
         public virtual void SetLocation(int x, int y)

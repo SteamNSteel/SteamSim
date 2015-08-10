@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,13 +8,31 @@ using Steam.API;
 
 namespace Steam.Machines
 {
-    class TheMod
+    public static class TheMod
     {
         internal static ISteamTransportRegistry SteamTransportRegistry;
+        public static readonly List<ModTileEntity> TileEntities = new List<ModTileEntity>();
 
-        public void OnSteamNSteelInitialized(SteamNSteelInitializedEvent evt)
+        public static void OnSteamNSteelInitialized(SteamNSteelInitializedEvent evt)
         {
             SteamTransportRegistry = evt.GetSteamTransportRegistry();
+        }
+
+        public static void AddTileEntity(ModTileEntity tileEntity)
+        {
+            lock (TileEntities)
+            {
+                TileEntities.Add(tileEntity);
+            }
+        }
+
+        public static void RemoveTileEntity(ModTileEntity tileEntity)
+        {
+            lock (TileEntities)
+            {
+                TileEntities.Remove(tileEntity);
+            }
+
         }
     }
 }

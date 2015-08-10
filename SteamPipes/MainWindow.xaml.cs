@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Steam.Machines;
 using SteamPipes.API;
 using SteamPipes.UI;
 
@@ -15,16 +18,51 @@ namespace SteamPipes
 	public partial class MainWindow : Window
 	{
 		private ClickBehaviour _clickBehaviour;
+	    private bool _tickThreadRunning;
+	    private DateTime _previousTick;
 
-		public MainWindow()
+	    public MainWindow()
 		{
 			InitializeComponent();
 
 			PlacePipeButton_Click(PlacePipeButton, null);
 			SteamManager.StartSimulationThread();
+		    //App.SteamManager.StartSimulationThread();
+		    StartTickThread();
 		}
 
-		private void ToggleButton(Button theButton)
+	    private void StartTickThread()
+	    {
+            var thread = new Thread(TickThreadStart) { Name = "Tick Thread" };
+	        _tickThreadRunning = true;
+            thread.Start();
+        }
+
+	    private void TickThreadStart()
+	    {
+	        var tps = TimeSpan.FromMilliseconds( 1 / 20.0 * 1000);
+            
+            while (_tickThreadRunning)
+            {
+                lock (TheMod.TileEntities)
+                {
+                    foreach (var tileEntity in TheMod.TileEntities)
+                    {
+                        tileEntity.OnTick();
+                    }
+                }
+
+                var thisTick = DateTime.Now;
+                _previousTick = thisTick;
+
+	            var timeSpan = tps - (DateTime.Now - _previousTick);
+                _previousTick = DateTime.Now;
+                Thread.Sleep(timeSpan);
+                
+            }
+	    }
+
+	    private void ToggleButton(Button theButton)
 		{
 			theButton.IsEnabled = false;
 			foreach (var button in PlaceBlockGroup.Children.OfType<Button>().Except(new[] {theButton}))

@@ -4,8 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Steam.Machines;
 using SteamPipes.API;
-using SteamPipes.Machines;
 
 namespace SteamPipes.UI
 {
@@ -19,13 +19,8 @@ namespace SteamPipes.UI
 			InitializeComponent();
 		}
 
-		internal SteamUnit SteamUnit { get; set; }
-
-		private void SteamUnitOnConnectionsChanged(object sender, EventArgs eventArgs)
-		{
-			Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(InvalidateVisual));
-		}
-
+		internal ModTileEntity SteamUnit { get; set; }
+        
 		private void SteamUnitDataChanged(object sender, EventArgs e)
 		{
 			Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(InvalidateVisual));
@@ -40,10 +35,12 @@ namespace SteamPipes.UI
 			}
 			else
 			{
+			    var steamTransport = SteamUnit.GetSteamTransport();
+
 				//if (SteamUnit.Debug)
 				//TODO: Vary colour by pipe temperature
 				//{
-					var colorBrush = SteamUnit.Debug ? Brushes.Red : Brushes.Blue;
+					var colorBrush = steamTransport.GetShouldDebug() ? Brushes.Red : Brushes.Blue;
 					drawingContext.DrawRoundedRectangle(Brushes.Transparent, new Pen(colorBrush, 2), new Rect(RenderSize), 5, 5);
 				//}
 
@@ -52,21 +49,21 @@ namespace SteamPipes.UI
 				{
 					solidColorBrush = Brushes.Green;
 				}
-				else if (SteamUnit is ISteamConsumer)
+				else if (steamTransport is ISteamConsumer)
 				{
 					solidColorBrush = Brushes.Tomato;
 				}
 
-				var waterUsage = (double) (SteamUnit.WaterStored/SteamUnit.MaxWater);
+				var waterUsage = (steamTransport.GetWaterStored()/(double)steamTransport.GetMaximumWater());
 				var waterHeightPixels = RenderSize.Height*waterUsage;
-				var steamRenderHeight = Math.Max(0, (RenderSize.Height - waterHeightPixels)*SteamUnit.SteamDensity/100);
+				var steamRenderHeight = Math.Max(0, (RenderSize.Height - waterHeightPixels)*steamTransport.GetCalculatedSteamDensity()/100);
 				
 				drawingContext.DrawRectangle(Brushes.LightGray, null,
 					new Rect(new Size(RenderSize.Width, steamRenderHeight)));
 				drawingContext.DrawRectangle(Brushes.CornflowerBlue, null,
 					new Rect(new Point(0, RenderSize.Height - waterHeightPixels), new Size(RenderSize.Width, waterHeightPixels)));
 
-				if (SteamUnit.UnitAbove != null)
+				if (steamTransport.CanTransportAbove())
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*0/4),
@@ -82,7 +79,7 @@ namespace SteamPipes.UI
 						new Point(RenderSize.Width*3/4, RenderSize.Height*1/4));
 				}
 
-				if (SteamUnit.UnitBelow != null)
+				if (steamTransport.CanTransportBelow())
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*3/4),
@@ -98,7 +95,7 @@ namespace SteamPipes.UI
 						new Point(RenderSize.Width*3/4, RenderSize.Height*3/4));
 				}
 
-				if (SteamUnit.UnitLeft != null)
+				if (steamTransport.CanTransportWest())
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*0/4, RenderSize.Height*1/4),
@@ -113,7 +110,7 @@ namespace SteamPipes.UI
 						new Point(RenderSize.Width*1/4, RenderSize.Height*1/4),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*3/4));
 				}
-				if (SteamUnit.UnitRight != null)
+				if (steamTransport.CanTransportEast())
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*3/4, RenderSize.Height*1/4),
@@ -131,24 +128,24 @@ namespace SteamPipes.UI
 
 				double y = 0;
 				var text =
-					new FormattedText("steam: " + Math.Floor(SteamUnit.SteamStored) + "/" + Math.Floor(SteamUnit.ActualMaxSteam),
+					new FormattedText("steam: " + steamTransport.GetSteamStored() + "/" + steamTransport.GetCalculatedMaximumSteam(),
 						CultureInfo.CurrentUICulture,
 						FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText("density: " + Math.Floor(SteamUnit.SteamDensity) + '%', CultureInfo.CurrentUICulture,
+				text = new FormattedText("density: " + Math.Floor(steamTransport.GetCalculatedSteamDensity()) + '%', CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText("water: " + Math.Floor(SteamUnit.WaterStored) + "/" + SteamUnit.MaxWater,
+				text = new FormattedText("water: " + steamTransport.GetWaterStored() + "/" + steamTransport.GetMaximumWater(),
 					CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText("temp: " + Math.Floor(SteamUnit.Temperature) + '%', CultureInfo.CurrentUICulture,
+				text = new FormattedText("temp: " + Math.Floor(steamTransport.GetTemperature()) + '%', CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 			}
@@ -156,7 +153,7 @@ namespace SteamPipes.UI
 
 		public void PlacePipe()
 		{
-			PlaceSteamUnit<SteamUnit>();
+			PlaceSteamUnit<PipeTileEntity>();
 		}
 
 		public void RemovePipe()
@@ -164,8 +161,7 @@ namespace SteamPipes.UI
 			if (SteamUnit != null)
 			{
 				SteamUnit.DataChanged -= SteamUnitDataChanged;
-				SteamUnit.ConnectionsChanged -= SteamUnitOnConnectionsChanged;
-				SteamManager.RemoveSteamUnit(SteamUnit);
+                SteamUnit.Destroy();
 				SteamUnit = null;
 			}
 			InvalidateVisual();
@@ -173,56 +169,46 @@ namespace SteamPipes.UI
 
 		public void InjectSteam(int amount)
 		{
-			if (SteamUnit != null)
-			{
-				SteamManager.InjectSteam(amount, SteamUnit);
-			}
+		    SteamUnit?.GetSteamTransport().AddSteam(amount);
 		}
 
-		public void RemoveSteam(int amount)
+	    public void RemoveSteam(int amount)
 		{
-			if (SteamUnit != null)
-			{
-				SteamManager.RemoveSteam(amount, SteamUnit);
-			}
+		    SteamUnit?.GetSteamTransport().TakeSteam(amount);
 		}
 
-		public void PlaceBoiler()
+	    public void PlaceBoiler()
 		{
-			PlaceSteamUnit<Boiler>();
+			PlaceSteamUnit<BoilerTileEntity>();
 		}
 
 		public void PlaceBallMill()
 		{
-			PlaceSteamUnit<BallMill>();
+			PlaceSteamUnit<BallMillTileEntity>();
 		}
 
 		public void PlaceFurnace()
 		{
-			PlaceSteamUnit<Furnace>();
+			PlaceSteamUnit<FurnaceTileEntity>();
 		}
 
 		public void ToggleDebug()
 		{
-			if (SteamUnit != null)
-			{
-				SteamUnit.Debug = !SteamUnit.Debug;
-			}
+		    SteamUnit?.GetSteamTransport().ToggleDebug();
 		}
 
-		private void PlaceSteamUnit<T>() where T : SteamUnit, new()
+	    private void PlaceSteamUnit<T>() where T : ModTileEntity, new()
 		{
 			if (SteamUnit != null && (!(SteamUnit is T)))
 			{
-				SteamManager.RemoveSteamUnit(SteamUnit);
-				SteamUnit.ConnectionsChanged -= SteamUnitOnConnectionsChanged;
+			    SteamUnit.Destroy();
 				SteamUnit.DataChanged -= SteamUnitDataChanged;
 				SteamUnit = null;
 			}
 			if (SteamUnit == null)
 			{
-				SteamUnit = SteamManager.CreateSteamUnit<T>(Grid.GetColumn(this), Grid.GetRow(this));
-				SteamUnit.ConnectionsChanged += SteamUnitOnConnectionsChanged;
+                SteamUnit = new T();
+                SteamUnit.SetLocation(Grid.GetColumn(this), Grid.GetRow(this));
 				SteamUnit.DataChanged += SteamUnitDataChanged;
 			}
 			InvalidateVisual();

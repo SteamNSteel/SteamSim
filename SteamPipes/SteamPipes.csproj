@@ -55,11 +55,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="API\ISteamManager.cs" />
-    <Compile Include="Machines\Boiler.cs" />
-    <Compile Include="Machines\BallMill.cs" />
-    <Compile Include="Machines\Furnace.cs" />
+    <Compile Include="Impl\SteamTransport.cs" />
     <Compile Include="API\ISteamConsumer.cs" />
     <Compile Include="API\ISteamProvider.cs" />
+    <Compile Include="Impl\SteamManager2.cs" />
     <Compile Include="UI\ClickBehaviour.cs" />
     <Compile Include="API\PointI2D.cs" />
     <Compile Include="API\SteamManager.cs" />
@@ -119,7 +118,16 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Steam.API\Steam.API.csproj">
+      <Project>{a61b79e4-0c04-442e-836d-b522e3f033d7}</Project>
+      <Name>Steam.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Steam.Machines\Steam.Machines.csproj">
+      <Project>{ea8a9fa4-7cfd-4b56-9cf6-107644271475}</Project>
+      <Name>Steam.Machines</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

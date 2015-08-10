@@ -5,13 +5,14 @@ namespace SteamPipes.API
 {
 	public class SteamUnit
 	{
-		private decimal _steamStored;
+        private decimal _waterStored;
+        private decimal _steamStored;
 		private decimal _temperature;
 		private SteamUnit _unitAbove;
 		private SteamUnit _unitBelow;
 		private SteamUnit _unitLeft;
 		private SteamUnit _unitRight;
-		private decimal _waterStored;
+		
 		private readonly List<SteamUnit> _allAdjacentConnections = new List<SteamUnit>();
 		private readonly List<SteamUnit> _horizontalAdjacentConnections = new List<SteamUnit>();
 
