@@ -27,7 +27,7 @@ namespace SteamPipes
 
 			PlacePipeButton_Click(PlacePipeButton, null);
 			SteamManager.StartSimulationThread();
-		    //App.SteamManager.StartSimulationThread();
+		    //App.SteamTransportRegistry.StartSimulationThread();
 		    StartTickThread();
 		}
 

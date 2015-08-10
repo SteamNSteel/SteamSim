@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Steam.API;
+using Steam.Machines;
 using SteamPipes.Impl;
 
 namespace SteamPipes
@@ -9,11 +10,11 @@ namespace SteamPipes
 	/// </summary>
 	public partial class App : Application
 	{
-	    public static readonly SteamManager2 SteamManager = new SteamManager2();
+	    public static readonly SteamTransportRegistry SteamTransportRegistry = new SteamTransportRegistry();
 
 	    public App()
 	    {
-            Steam.Machines.TheMod.OnSteamNSteelInitialized(new SteamNSteelInitializedEvent(SteamManager));
+            TheMod.OnSteamNSteelInitialized(new SteamNSteelInitializedEvent(SteamTransportRegistry));
         }
 	}
 }

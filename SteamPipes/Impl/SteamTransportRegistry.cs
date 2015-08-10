@@ -6,8 +6,8 @@ namespace SteamPipes.Impl
 {
     // ReSharper disable SuggestVarOrType_Elsewhere
     // ReSharper disable SuggestVarOrType_SimpleTypes
-    // ReSharper disable SuggestVarOrType_BuiltInTypes
-    public class SteamManager2 : ISteamManager, ISteamTransportRegistry
+    // ReSharper disable SuggestVarOrType_BuiltInTypes  
+    public class SteamTransportRegistry : ISteamTransportRegistry
     {
         private static readonly ConcurrentDictionary<SteamTransportLocation, SteamTransport> SteamUnits =
             new ConcurrentDictionary<SteamTransportLocation, SteamTransport>();
