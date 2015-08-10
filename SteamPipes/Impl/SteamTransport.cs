@@ -118,6 +118,11 @@ namespace SteamPipes.Impl
             return _maximumSteam;
         }
 
+        public double GetTemperature()
+        {
+            return _temperature;
+        }
+
         public double GetCalculatedSteamDensity()
         {
             var calculatedMaximumSteam = GetCalculatedMaximumSteam();
@@ -145,11 +150,6 @@ namespace SteamPipes.Impl
         public int GetCalculatedMaximumSteam()
         {
             return (1 - (_waterStored / _maximumWater)) * _maximumSteam;
-        }
-
-        public double GetTemperature()
-        {
-            return _temperature;
         }
 
         public void SetCanConnect(ForgeDirection direction, bool canConnect)
@@ -193,7 +193,5 @@ namespace SteamPipes.Impl
         {
             return _adjacentTransports[(int)ForgeDirection.EAST] != null;
         }
-
-        
     }
 }
