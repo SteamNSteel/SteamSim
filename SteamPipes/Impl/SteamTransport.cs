@@ -54,7 +54,7 @@ namespace SteamPipes.Impl
 
         public int TakeSteam(int desiredUnitsOfSteam)
         {
-            if (desiredUnitsOfSteam >= _steamStored)
+            if (desiredUnitsOfSteam <= _steamStored)
             {
                 _steamStored -= desiredUnitsOfSteam;
                 return desiredUnitsOfSteam;
