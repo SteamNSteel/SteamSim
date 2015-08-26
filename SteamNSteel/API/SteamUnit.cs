@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace SteamNSteel.API
 {
-	public class SteamUnit
+    [Obsolete("Currently kept for reference")]
+    public class SteamUnit
 	{
         private decimal _waterStored;
         private decimal _steamStored;

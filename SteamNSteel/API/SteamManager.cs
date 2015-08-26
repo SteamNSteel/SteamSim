@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,6 +7,7 @@ using System.Threading;
 
 namespace SteamNSteel.API
 {
+    [Obsolete("Currently kept for reference")]
 	public static class SteamManager
 	{
 		private const decimal TransferRatio = 0.8m;

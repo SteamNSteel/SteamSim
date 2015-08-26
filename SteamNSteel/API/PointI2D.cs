@@ -1,6 +1,9 @@
-﻿namespace SteamNSteel.API
+﻿using System;
+
+namespace SteamNSteel.API
 {
-	internal class PointI2D
+    [Obsolete("Currently kept for reference")]
+    internal class PointI2D
 	{
 		internal PointI2D(int x, int y)
 		{

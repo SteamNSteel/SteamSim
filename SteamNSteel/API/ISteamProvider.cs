@@ -1,6 +1,9 @@
+using System;
+
 namespace SteamNSteel.API
 {
-	public interface ISteamProvider
+    [Obsolete("Currently kept for reference")]
+    public interface ISteamProvider
 	{
 		int AmountPerTick { get; }
 	}
