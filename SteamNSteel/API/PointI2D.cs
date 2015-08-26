@@ -1,4 +1,4 @@
-﻿namespace SteamPipes.API
+﻿namespace SteamNSteel.API
 {
 	internal class PointI2D
 	{

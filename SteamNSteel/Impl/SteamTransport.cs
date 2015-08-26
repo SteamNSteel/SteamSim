@@ -1,7 +1,7 @@
 using System;
 using Steam.API;
 
-namespace SteamPipes.Impl
+namespace SteamNSteel.Impl
 {
     public class SteamTransport : ISteamTransport
     {

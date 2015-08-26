@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Steam.Machines;
-using SteamPipes.API;
+using SteamNSteel.API;
 
 namespace SteamPipes.UI
 {

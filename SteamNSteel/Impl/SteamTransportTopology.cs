@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SteamPipes.Impl
+namespace SteamNSteel.Impl
 {
     internal class SteamTransportTopology
     {

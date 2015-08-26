@@ -1,9 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Steam.API;
-using SteamPipes.API;
 
-namespace SteamPipes.Impl
+namespace SteamNSteel.Impl
 {
     // ReSharper disable SuggestVarOrType_Elsewhere
     // ReSharper disable SuggestVarOrType_SimpleTypes

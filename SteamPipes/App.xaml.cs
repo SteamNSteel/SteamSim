@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using Steam.API;
 using Steam.Machines;
-using SteamPipes.Impl;
-using SteamPipes.Jobs;
+using SteamNSteel.Impl;
+using SteamNSteel.Jobs;
 
 namespace SteamPipes
 {

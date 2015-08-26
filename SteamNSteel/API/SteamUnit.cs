@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SteamPipes.API
+namespace SteamNSteel.API
 {
 	public class SteamUnit
 	{

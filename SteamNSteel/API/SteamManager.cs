@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace SteamPipes.API
+namespace SteamNSteel.API
 {
 	public static class SteamManager
 	{

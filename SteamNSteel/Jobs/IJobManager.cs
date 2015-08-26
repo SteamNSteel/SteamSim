@@ -1,4 +1,4 @@
-﻿namespace SteamPipes.Jobs
+﻿namespace SteamNSteel.Jobs
 {
     public interface IJobManager
     {

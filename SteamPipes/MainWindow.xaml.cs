@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Steam.Machines;
-using SteamPipes.API;
+using SteamNSteel.API;
 using SteamPipes.UI;
 
 namespace SteamPipes

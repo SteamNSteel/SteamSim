@@ -1,4 +1,4 @@
-namespace SteamPipes.API
+namespace SteamNSteel.API
 {
 	public interface ISteamConsumer
 	{

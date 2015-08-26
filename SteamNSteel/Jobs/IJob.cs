@@ -1,4 +1,4 @@
-namespace SteamPipes.Jobs
+namespace SteamNSteel.Jobs
 {
     internal interface IJob
     {
