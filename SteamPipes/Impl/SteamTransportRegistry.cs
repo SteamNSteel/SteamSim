@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Steam.API;
 using SteamPipes.API;
 
@@ -9,13 +10,16 @@ namespace SteamPipes.Impl
     // ReSharper disable SuggestVarOrType_BuiltInTypes  
     public class SteamTransportRegistry : ISteamTransportRegistry
     {
-        private static readonly ConcurrentDictionary<SteamTransportLocation, SteamTransport> SteamUnits =
+        private readonly ConcurrentDictionary<SteamTransportLocation, SteamTransport> SteamUnits =
             new ConcurrentDictionary<SteamTransportLocation, SteamTransport>();
+
+        private readonly List<SteamTransportTopology> ActiveTopologies = new List<SteamTransportTopology>();
+        private readonly List<SteamTransportLocation> PendingTopologyChanges = new List<SteamTransportLocation>();
 
         public ISteamTransport RegisterSteamTransport(int x, int y, ForgeDirection[] initialAllowedDirections)
         {
             SteamTransportLocation steamTransportLocation = new SteamTransportLocation(x, y);
-            SteamTransport result = SteamUnits.GetOrAdd(steamTransportLocation, new SteamTransport());
+            SteamTransport result = SteamUnits.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
             
             bool[] allowedDirections = new bool[6];
             
@@ -43,10 +47,15 @@ namespace SteamPipes.Impl
 
                 ForgeDirection oppositeDirection = direction.getOpposite();
                 if (!foundTransport.CanConnect(oppositeDirection)) continue;
+                
+                ActiveTopologies.Remove(foundTransport.GetTopology());
+                PendingTopologyChanges.Add(foundTransport.GetTransportLocation());
 
                 result.SetAdjacentTransport(direction, foundTransport);
                 foundTransport.SetAdjacentTransport(oppositeDirection, result);
             }
+
+            this.PendingTopologyChanges.Add(steamTransportLocation);
 
             return result;
         }
@@ -54,12 +63,19 @@ namespace SteamPipes.Impl
         public void DestroySteamTransport(int x, int y)
         {
             SteamTransport transport;
-            SteamUnits.TryRemove(new SteamTransportLocation(x, y), out transport);
+            var steamTransportLocation = new SteamTransportLocation(x, y);
+            SteamUnits.TryRemove(steamTransportLocation, out transport);
+
+            ActiveTopologies.Remove(transport.GetTopology());
 
             foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
             {
                 SteamTransport adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
-                adjacentTransport?.SetAdjacentTransport(direction.getOpposite(), null);
+                if (adjacentTransport == null) continue;
+
+                ActiveTopologies.Remove(adjacentTransport.GetTopology());
+                PendingTopologyChanges.Add(adjacentTransport.GetTransportLocation());
+                adjacentTransport.SetAdjacentTransport(direction.getOpposite(), null);
             }
         }
     }

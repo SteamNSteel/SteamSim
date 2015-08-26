@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -60,6 +61,11 @@ namespace SteamPipes
                 Thread.Sleep(timeSpan);
                 
             }
+	    }
+
+	    protected override void OnClosing(CancelEventArgs e)
+	    {
+	        _tickThreadRunning = false;
 	    }
 
 	    private void ToggleButton(Button theButton)

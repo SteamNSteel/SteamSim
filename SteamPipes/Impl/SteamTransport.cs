@@ -5,8 +5,12 @@ namespace SteamPipes.Impl
 {
     public class SteamTransport : ISteamTransport
     {
-        public SteamTransport()
+        private readonly SteamTransportLocation _steamTransportLocation;
+        private SteamTransportTopology _topology;
+
+        internal SteamTransport(SteamTransportLocation steamTransportLocation)
         {
+            _steamTransportLocation = steamTransportLocation;
             _maximumSteam = 1000;
             _maximumWater = 800;
         }
@@ -23,7 +27,7 @@ namespace SteamPipes.Impl
         readonly bool[] _canConnect = new bool[6];
 
         private bool _debug;
-
+        
         public void AddSteam(int unitsOfSteam)
         {
             if (_steamStored + unitsOfSteam >= _maximumSteam)
@@ -192,6 +196,21 @@ namespace SteamPipes.Impl
         public bool CanTransportEast()
         {
             return _adjacentTransports[(int)ForgeDirection.EAST] != null;
+        }
+
+        internal SteamTransportTopology GetTopology()
+        {
+            return _topology;
+        }
+
+        internal void SetTopology(SteamTransportTopology topology)
+        {
+            _topology = topology;
+        }
+
+        internal SteamTransportLocation GetTransportLocation()
+        {
+            return _steamTransportLocation;
         }
     }
 }
