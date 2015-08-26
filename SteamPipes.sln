@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Steam.API", "Steam.API\Stea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Steam.Machines", "Steam.Machines\Steam.Machines.csproj", "{EA8A9FA4-7CFD-4B56-9CF6-107644271475}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamNSteel", "SteamNSteel\SteamNSteel.csproj", "{50C59B60-E922-4292-B5BB-F701AA68C0D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{EA8A9FA4-7CFD-4B56-9CF6-107644271475}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA8A9FA4-7CFD-4B56-9CF6-107644271475}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA8A9FA4-7CFD-4B56-9CF6-107644271475}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50C59B60-E922-4292-B5BB-F701AA68C0D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50C59B60-E922-4292-B5BB-F701AA68C0D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50C59B60-E922-4292-B5BB-F701AA68C0D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50C59B60-E922-4292-B5BB-F701AA68C0D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

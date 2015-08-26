@@ -54,19 +54,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Impl\SteamTransport.cs" />
-    <Compile Include="API\ISteamConsumer.cs" />
-    <Compile Include="API\ISteamProvider.cs" />
-    <Compile Include="Impl\SteamTransportRegistry.cs" />
-    <Compile Include="Impl\SteamTransportLocation.cs" />
-    <Compile Include="Impl\SteamTransportTopology.cs" />
-    <Compile Include="Jobs\IJob.cs" />
-    <Compile Include="Jobs\IJobManager.cs" />
-    <Compile Include="Jobs\JobManager.cs" />
     <Compile Include="UI\ClickBehaviour.cs" />
-    <Compile Include="API\PointI2D.cs" />
-    <Compile Include="API\SteamManager.cs" />
-    <Compile Include="API\SteamUnit.cs" />
     <Compile Include="UI\SteamUnitContainer.xaml.cs">
       <DependentUpon>SteamUnitContainer.xaml</DependentUpon>
     </Compile>
@@ -130,6 +118,10 @@
     <ProjectReference Include="..\Steam.Machines\Steam.Machines.csproj">
       <Project>{ea8a9fa4-7cfd-4b56-9cf6-107644271475}</Project>
       <Name>Steam.Machines</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SteamNSteel\SteamNSteel.csproj">
+      <Project>{50C59B60-E922-4292-B5BB-F701AA68C0D6}</Project>
+      <Name>SteamNSteel</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
