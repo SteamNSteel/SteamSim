@@ -20,7 +20,7 @@ namespace SteamPipes
 	{
 		private ClickBehaviour _clickBehaviour;
 	    private bool _tickThreadRunning;
-	    private DateTime _previousTick;
+	    private DateTime _previousTick = DateTime.Now;
 
 	    public MainWindow()
 		{
