@@ -11,8 +11,8 @@ namespace Steam.Machines
         public override void SetLocation(int x, int y)
         {
             base.SetLocation(x, y);
-            _steamTransport = TheMod.SteamTransportRegistry.RegisterSteamTransport(x, y, GetValidSteamTransportDirections());
-            TheMod.AddTileEntity(this);
+            _steamTransport = ChildMod.SteamTransportRegistry.RegisterSteamTransport(x, y, GetValidSteamTransportDirections());
+            ChildMod.AddTileEntity(this);
         }
 
         protected virtual ForgeDirection[] GetValidSteamTransportDirections()
@@ -37,8 +37,8 @@ namespace Steam.Machines
 
         public void Destroy()
         {
-            TheMod.SteamTransportRegistry.DestroySteamTransport(_x, _y);
-            TheMod.RemoveTileEntity(this);
+            ChildMod.SteamTransportRegistry.DestroySteamTransport(_x, _y);
+            ChildMod.RemoveTileEntity(this);
         }
 
         public override void OnTick()

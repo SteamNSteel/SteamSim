@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using Steam.API;
 using Steam.Machines;
+using SteamNSteel;
 using SteamNSteel.Impl;
 using SteamNSteel.Jobs;
 
@@ -18,8 +19,9 @@ namespace SteamPipes
 	    public App()
 	    {
             JobManagerImpl.Start();
-            
-            TheMod.OnSteamNSteelInitialized(new SteamNSteelInitializedEvent(SteamTransportRegistry));
+
+			TheMod.OnSteamNSteelInitialized(new SteamNSteelInitializedEvent(SteamTransportRegistry));
+			ChildMod.OnSteamNSteelInitialized(new SteamNSteelInitializedEvent(SteamTransportRegistry));
         }
 
 	    protected override void OnExit(ExitEventArgs e)

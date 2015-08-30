@@ -206,6 +206,7 @@ namespace SteamNSteel.Impl
         internal void SetTopology(SteamTransportTopology topology)
         {
             _topology = topology;
+	        topology.AddTransport(this);
         }
 
         internal SteamTransportLocation GetTransportLocation()

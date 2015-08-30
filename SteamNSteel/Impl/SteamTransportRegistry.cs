@@ -15,9 +15,10 @@ namespace SteamNSteel.Impl
         private readonly List<SteamTransportTopology> ActiveTopologies = new List<SteamTransportTopology>();
         private readonly List<SteamTransportLocation> PendingTopologyChanges = new List<SteamTransportLocation>();
 
+
         public ISteamTransport RegisterSteamTransport(int x, int y, ForgeDirection[] initialAllowedDirections)
         {
-            SteamTransportLocation steamTransportLocation = new SteamTransportLocation(x, y);
+            SteamTransportLocation steamTransportLocation = SteamTransportLocation.Create(x, y);
             SteamTransport result = SteamUnits.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
             
             bool[] allowedDirections = new bool[6];
@@ -27,6 +28,7 @@ namespace SteamNSteel.Impl
                 allowedDirections[(int) initialAllowedDirection] = true;
             }
 
+            //Should this be a job?
             foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
             {
                 bool canConnect = allowedDirections[(int) direction];
@@ -34,12 +36,7 @@ namespace SteamNSteel.Impl
 
                 if (!canConnect) continue;
 
-                SteamTransportLocation altSteamTransportLocation = new SteamTransportLocation(
-                    steamTransportLocation.X + direction.offsetX,
-                    steamTransportLocation.Y - direction.offsetY,
-                    steamTransportLocation.Z + direction.offsetZ,
-                    steamTransportLocation.WorldId
-                    );
+	            SteamTransportLocation altSteamTransportLocation = steamTransportLocation.Offset(direction);
 
                 SteamTransport foundTransport;
                 if (!SteamUnits.TryGetValue(altSteamTransportLocation, out foundTransport)) continue;
@@ -49,12 +46,12 @@ namespace SteamNSteel.Impl
                 
                 ActiveTopologies.Remove(foundTransport.GetTopology());
                 PendingTopologyChanges.Add(foundTransport.GetTransportLocation());
-
+                
                 result.SetAdjacentTransport(direction, foundTransport);
                 foundTransport.SetAdjacentTransport(oppositeDirection, result);
             }
 
-            this.PendingTopologyChanges.Add(steamTransportLocation);
+            PendingTopologyChanges.Add(steamTransportLocation);
 
             return result;
         }
@@ -62,7 +59,7 @@ namespace SteamNSteel.Impl
         public void DestroySteamTransport(int x, int y)
         {
             SteamTransport transport;
-            var steamTransportLocation = new SteamTransportLocation(x, y);
+            var steamTransportLocation = SteamTransportLocation.Create(x, y);
             SteamUnits.TryRemove(steamTransportLocation, out transport);
 
             ActiveTopologies.Remove(transport.GetTopology());
@@ -77,5 +74,26 @@ namespace SteamNSteel.Impl
                 adjacentTransport.SetAdjacentTransport(direction.getOpposite(), null);
             }
         }
-    }
+
+	    public ISteamTransport GetSteamTransportAtLocation(int x, int y)
+	    {
+		    var steamTransportLocation = SteamTransportLocation.Create(x, y);
+		    SteamTransport value;
+		    if (SteamUnits.TryGetValue(steamTransportLocation, out value))
+		    {
+			    return value;
+		    }
+		    return null;
+	    }
+
+		public SteamTransport GetSteamTransportAtLocation(SteamTransportLocation steamTransportLocation)
+		{
+			SteamTransport value;
+			if (SteamUnits.TryGetValue(steamTransportLocation, out value))
+			{
+				return value;
+			}
+			return null;
+		}
+	}
 }

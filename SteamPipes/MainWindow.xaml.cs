@@ -45,9 +45,9 @@ namespace SteamPipes
             
             while (_tickThreadRunning)
             {
-                lock (TheMod.TileEntities)
+                lock (ChildMod.TileEntities)
                 {
-                    foreach (var tileEntity in TheMod.TileEntities)
+                    foreach (var tileEntity in ChildMod.TileEntities)
                     {
                         tileEntity.OnTick();
                     }

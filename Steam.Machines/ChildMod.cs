@@ -8,7 +8,7 @@ using Steam.API;
 
 namespace Steam.Machines
 {
-    public static class TheMod
+    public static class ChildMod
     {
         internal static ISteamTransportRegistry SteamTransportRegistry;
         public static readonly List<ModTileEntity> TileEntities = new List<ModTileEntity>();

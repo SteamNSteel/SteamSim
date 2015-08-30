@@ -1,18 +1,26 @@
-﻿namespace SteamNSteel.Impl
-{
-    internal class SteamTransportLocation
-    {
-        internal SteamTransportLocation(int x, int y) : this(x, y, 0, 0)
-        {
-        }
+﻿using Steam.API;
 
-        internal SteamTransportLocation(int x, int y, int z, int worldId)
+namespace SteamNSteel.Impl
+{
+    public class SteamTransportLocation
+    {
+        private SteamTransportLocation(int x, int y, int z, int worldId)
         {
             X = x;
             Y = y;
             Z = z;
             WorldId = worldId;
         }
+
+		public static SteamTransportLocation Create(int x, int y)
+		{
+			return new SteamTransportLocation(x, y, 0, 0);
+		}
+
+		public static SteamTransportLocation Create(int x, int y, int z, int worldId)
+	    {
+		    return new SteamTransportLocation(x, y, z, worldId);
+	    }
 
         public int X { get; }
         public int Y { get; }
@@ -43,5 +51,11 @@
             if (obj.GetType() != GetType()) return false;
             return Equals((SteamTransportLocation) obj);
         }
+
+	    public SteamTransportLocation Offset(ForgeDirection direction)
+	    {
+			//Fixme: Use a pool?
+		    return new SteamTransportLocation(X + direction.offsetX, Y + direction.offsetY, Z + direction.offsetZ, WorldId);
+	    }
     }
 }
