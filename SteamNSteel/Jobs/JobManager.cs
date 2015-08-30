@@ -9,7 +9,7 @@ namespace SteamNSteel.Jobs
     {
         private readonly List<Thread> JobThreads = new List<Thread>();
         private bool running = true;
-        private readonly IProducerConsumerCollection<IJob> BackgroundJobs = new ConcurrentQueue<IJob>(); 
+        private BlockingCollection<IJob> _backgroundJobs = new BlockingCollection<IJob>(); 
 
         public JobManager()
         {
@@ -19,6 +19,7 @@ namespace SteamNSteel.Jobs
         public void Start()
         {
             Stop();
+            _backgroundJobs = new BlockingCollection<IJob>();
             running = true;
             for (int i = 0; i < Environment.ProcessorCount; ++i)
             {
@@ -32,6 +33,7 @@ namespace SteamNSteel.Jobs
         public void Stop()
         {
             running = false;
+            _backgroundJobs.CompleteAdding();
             foreach (var thread in JobThreads)
             {
                 thread.Join();
@@ -43,8 +45,7 @@ namespace SteamNSteel.Jobs
         {
             while (running)
             {
-                IJob job;
-                if (BackgroundJobs.TryTake(out job))
+                foreach (var job in _backgroundJobs.GetConsumingEnumerable())
                 {
                     job.Execute();
                 }
