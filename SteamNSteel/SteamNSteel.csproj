@@ -50,6 +50,7 @@
     <Compile Include="Impl\SteamTransport.cs" />
     <Compile Include="Impl\SteamTransportLocation.cs" />
     <Compile Include="Impl\SteamTransportRegistry.cs" />
+    <Compile Include="Impl\SteamTransportStateMachine.cs" />
     <Compile Include="Impl\SteamTransportTopology.cs" />
     <Compile Include="Jobs\IJob.cs" />
     <Compile Include="Jobs\IJobManager.cs" />

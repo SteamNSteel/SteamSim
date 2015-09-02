@@ -3,12 +3,12 @@ using Steam.API;
 
 namespace SteamNSteel.Impl
 {
-    public class SteamTransport : ISteamTransport
+    class SteamTransport : ISteamTransport
     {
         private readonly SteamTransportLocation _steamTransportLocation;
         private SteamTransportTopology _topology;
 
-        internal SteamTransport(SteamTransportLocation steamTransportLocation)
+	    internal SteamTransport(SteamTransportLocation steamTransportLocation)
         {
             _steamTransportLocation = steamTransportLocation;
             _maximumSteam = 1000;

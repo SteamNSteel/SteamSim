@@ -16,6 +16,11 @@ namespace SteamNSteel.Jobs
             
         }
 
+	    public void AddBackgroundJob(IJob job)
+	    {
+		    _backgroundJobs.Add(job);
+	    }
+
         public void Start()
         {
             Stop();

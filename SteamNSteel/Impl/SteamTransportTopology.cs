@@ -5,9 +5,9 @@ namespace SteamNSteel.Impl
 {
     internal class SteamTransportTopology
     {
-	    private readonly int _topologyGeneration;
-		private readonly Object _lockObject = new object();
-		List<SteamTransport> _locatedTransports = new List<SteamTransport>(); 
+	    private readonly long _topologyGeneration;
+		private readonly object _lockObject = new object();
+	    readonly List<SteamTransport> _locatedTransports = new List<SteamTransport>(); 
 
 	    protected bool Equals(SteamTransportTopology other)
         {
@@ -21,16 +21,22 @@ namespace SteamNSteel.Impl
 
         private readonly Guid _id;
 
-        public SteamTransportTopology(int topologyGeneration)
+        public SteamTransportTopology(long topologyGeneration)
         {
 	        _topologyGeneration = topologyGeneration;
 	        _id = Guid.NewGuid();
         }
 
 	    public override bool Equals(object obj)
-        {
-            return base.Equals(obj);
-        }
+	    {
+		    SteamTransportTopology topology = obj as SteamTransportTopology;
+		    if (topology == null)
+		    {
+			    return false;
+		    }
+
+		    return topology._id == _id;
+	    }
 
 
 	    public bool IsSupercededBy(SteamTransportTopology otherTopology)
@@ -45,7 +51,7 @@ namespace SteamNSteel.Impl
 
 	    public bool HasPriorityOver(SteamTransportTopology otherTopology)
 	    {
-		    return _id.CompareTo(otherTopology) > 0;
+		    return _id.CompareTo(otherTopology._id) > 0;
 	    }
 
 	    public void AddTransport(SteamTransport steamTransport)
@@ -66,6 +72,11 @@ namespace SteamNSteel.Impl
 	    public object GetLockObject()
 	    {
 		    return _lockObject; 
+	    }
+
+	    public override string ToString()
+	    {
+		    return $"[Id: {_id}, Entries: {_locatedTransports.Count}]";
 	    }
     }
 }

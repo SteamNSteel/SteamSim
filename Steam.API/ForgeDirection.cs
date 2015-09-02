@@ -2,12 +2,15 @@
 {
     public struct ForgeDirection
     {
-        /** -Y */
-        public static readonly ForgeDirection DOWN = new ForgeDirection(0, -1, 0, 0);
-        /** +Y */
-        public static readonly ForgeDirection UP = new ForgeDirection(0, 1, 0, 1);
-        /** -Z */
-        public static readonly ForgeDirection NORTH = new ForgeDirection(0, 0, -1, 2);
+		//Y has been reversed for this program because XAML.
+		/** -Y */
+		//public static readonly ForgeDirection DOWN = new ForgeDirection(0, -1, 0, 0);
+		public static readonly ForgeDirection DOWN = new ForgeDirection(0, 1, 0, 0);
+		/** +Y */
+		//public static readonly ForgeDirection UP = new ForgeDirection(0, 1, 0, 1);
+		public static readonly ForgeDirection UP = new ForgeDirection(0, -1, 0, 1);
+		/** -Z */
+		public static readonly ForgeDirection NORTH = new ForgeDirection(0, 0, -1, 2);
         /** +Z */
         public static readonly ForgeDirection SOUTH = new ForgeDirection(0, 0, 1, 3);
         /** -X */

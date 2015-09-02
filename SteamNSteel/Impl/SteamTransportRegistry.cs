@@ -12,10 +12,6 @@ namespace SteamNSteel.Impl
         private readonly ConcurrentDictionary<SteamTransportLocation, SteamTransport> SteamUnits =
             new ConcurrentDictionary<SteamTransportLocation, SteamTransport>();
 
-        private readonly List<SteamTransportTopology> ActiveTopologies = new List<SteamTransportTopology>();
-        private readonly List<SteamTransportLocation> PendingTopologyChanges = new List<SteamTransportLocation>();
-
-
         public ISteamTransport RegisterSteamTransport(int x, int y, ForgeDirection[] initialAllowedDirections)
         {
             SteamTransportLocation steamTransportLocation = SteamTransportLocation.Create(x, y);
@@ -43,15 +39,16 @@ namespace SteamNSteel.Impl
 
                 ForgeDirection oppositeDirection = direction.getOpposite();
                 if (!foundTransport.CanConnect(oppositeDirection)) continue;
-                
-                ActiveTopologies.Remove(foundTransport.GetTopology());
-                PendingTopologyChanges.Add(foundTransport.GetTransportLocation());
-                
+
+				TheMod.SteamTransportStateMachine.DeactivateTopology(foundTransport.GetTopology());
+				TheMod.SteamTransportStateMachine.AddPendingTopologyChange(foundTransport.GetTransportLocation());
+	            
+				
                 result.SetAdjacentTransport(direction, foundTransport);
                 foundTransport.SetAdjacentTransport(oppositeDirection, result);
             }
 
-            PendingTopologyChanges.Add(steamTransportLocation);
+			TheMod.SteamTransportStateMachine.AddPendingTopologyChange(steamTransportLocation);
 
             return result;
         }
@@ -62,31 +59,20 @@ namespace SteamNSteel.Impl
             var steamTransportLocation = SteamTransportLocation.Create(x, y);
             SteamUnits.TryRemove(steamTransportLocation, out transport);
 
-            ActiveTopologies.Remove(transport.GetTopology());
+			TheMod.SteamTransportStateMachine.DeactivateTopology(transport.GetTopology());
 
             foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
             {
                 SteamTransport adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
                 if (adjacentTransport == null) continue;
 
-                ActiveTopologies.Remove(adjacentTransport.GetTopology());
-                PendingTopologyChanges.Add(adjacentTransport.GetTransportLocation());
+				TheMod.SteamTransportStateMachine.DeactivateTopology(adjacentTransport.GetTopology());
+				TheMod.SteamTransportStateMachine.AddPendingTopologyChange(adjacentTransport.GetTransportLocation());
                 adjacentTransport.SetAdjacentTransport(direction.getOpposite(), null);
             }
         }
 
-	    public ISteamTransport GetSteamTransportAtLocation(int x, int y)
-	    {
-		    var steamTransportLocation = SteamTransportLocation.Create(x, y);
-		    SteamTransport value;
-		    if (SteamUnits.TryGetValue(steamTransportLocation, out value))
-		    {
-			    return value;
-		    }
-		    return null;
-	    }
-
-		public SteamTransport GetSteamTransportAtLocation(SteamTransportLocation steamTransportLocation)
+		public ISteamTransport GetSteamTransportAtLocation(SteamTransportLocation steamTransportLocation)
 		{
 			SteamTransport value;
 			if (SteamUnits.TryGetValue(steamTransportLocation, out value))

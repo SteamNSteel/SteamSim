@@ -1,6 +1,6 @@
 namespace SteamNSteel.Jobs
 {
-    internal interface IJob
+    public interface IJob
     {
         void Execute();
     }

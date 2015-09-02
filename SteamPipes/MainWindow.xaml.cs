@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Steam.Machines;
+using SteamNSteel;
 using SteamNSteel.API;
 using SteamPipes.UI;
 
@@ -45,21 +46,22 @@ namespace SteamPipes
             
             while (_tickThreadRunning)
             {
-                lock (ChildMod.TileEntities)
+				TheMod.OnTick();
+
+				lock (ChildMod.TileEntities)
                 {
                     foreach (var tileEntity in ChildMod.TileEntities)
                     {
                         tileEntity.OnTick();
                     }
                 }
-
+	            
                 var thisTick = DateTime.Now;
                 _previousTick = thisTick;
 
 	            var timeSpan = tps - (DateTime.Now - _previousTick);
                 _previousTick = DateTime.Now;
                 Thread.Sleep(timeSpan);
-                
             }
 	    }
 
