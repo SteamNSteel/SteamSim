@@ -39,15 +39,10 @@ namespace SteamNSteel.Impl
 
                 ForgeDirection oppositeDirection = direction.getOpposite();
                 if (!foundTransport.CanConnect(oppositeDirection)) continue;
-
-				TheMod.SteamTransportStateMachine.DeactivateTopology(foundTransport.GetTopology());
-				//TheMod.SteamTransportStateMachine.AddPendingTopologyChange(foundTransport.GetTransportLocation());
 				
                 result.SetAdjacentTransport(direction, foundTransport);
                 foundTransport.SetAdjacentTransport(oppositeDirection, result);
             }
-
-			TheMod.SteamTransportStateMachine.AddPendingTopologyChange(steamTransportLocation);
 
             return result;
         }
@@ -58,15 +53,11 @@ namespace SteamNSteel.Impl
             var steamTransportLocation = SteamTransportLocation.Create(x, y);
             SteamUnits.TryRemove(steamTransportLocation, out transport);
 
-			TheMod.SteamTransportStateMachine.DeactivateTopology(transport.GetTopology());
-
             foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
             {
                 SteamTransport adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
                 if (adjacentTransport == null) continue;
 
-				TheMod.SteamTransportStateMachine.DeactivateTopology(adjacentTransport.GetTopology());
-				TheMod.SteamTransportStateMachine.AddPendingTopologyChange(adjacentTransport.GetTransportLocation());
                 adjacentTransport.SetAdjacentTransport(direction.getOpposite(), null);
             }
         }
