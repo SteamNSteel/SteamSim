@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Steam.API;
 using SteamNSteel.Jobs;
 
@@ -23,6 +24,8 @@ namespace SteamNSteel.Impl.Jobs
 			SteamTransportRegistry steamTransportRegistry = TheMod.SteamTransportRegistry;
 			HashSet<SteamTransportTopology> topologiesToMerge = new HashSet<SteamTransportTopology>();
 			SteamTransportTopology newTopology = new SteamTransportTopology(_topologyGeneration);
+			var threadName = Thread.CurrentThread.Name;
+
 			lock (newTopology.GetLockObject())
 			{
 				Stack<SteamTransportLocation> todoList = new Stack<SteamTransportLocation>();
@@ -30,27 +33,47 @@ namespace SteamNSteel.Impl.Jobs
 				while (todoList.Count > 0)
 				{
 					SteamTransportLocation location = todoList.Pop();
-
+					Console.WriteLine($"{threadName} - Working on {location}");
 					SteamTransport transportAtLocation = (SteamTransport)steamTransportRegistry.GetSteamTransportAtLocation(location);
-					transportAtLocation.SetTopology(newTopology);
-
-					foreach (var forgeDirection in ForgeDirection.VALID_DIRECTIONS)
+					if (transportAtLocation == null) continue;
+					
+					lock (transportAtLocation._syncObj)
 					{
-						SteamTransportLocation steamTransportLocation = _location.Offset(forgeDirection);
-						SteamTransport steamTransportAtLocation = (SteamTransport)steamTransportRegistry.GetSteamTransportAtLocation(steamTransportLocation);
-						if (steamTransportAtLocation == null) continue;
-
-						SteamTransportTopology currentTopology = steamTransportAtLocation.GetTopology();
-						if (currentTopology == null || currentTopology.IsSupercededBy(newTopology))
+						var currentTransportTopology = transportAtLocation.GetTopology();
+						if (currentTransportTopology != null && currentTransportTopology.IsSameGenerationAs(newTopology))
 						{
-							todoList.Push(steamTransportLocation);
+							Console.WriteLine($"{threadName} - {location} has already been processed this generation.");
+							continue;
 						}
-						else if (!currentTopology.Equals(newTopology) && currentTopology.IsSameGenerationAs(newTopology))
+
+						transportAtLocation.SetTopology(newTopology);
+
+						foreach (var forgeDirection in ForgeDirection.VALID_DIRECTIONS)
 						{
-							//This check might not be nessessary in Java
-							if (currentTopology.HasPriorityOver(newTopology) && !topologiesToMerge.Contains(currentTopology))
+							SteamTransportLocation steamTransportLocation = location.Offset(forgeDirection);
+							SteamTransport steamTransportAtLocation =
+								(SteamTransport) steamTransportRegistry.GetSteamTransportAtLocation(steamTransportLocation);
+							if (steamTransportAtLocation == null)
 							{
-								topologiesToMerge.Add(currentTopology);
+								Console.WriteLine($"{threadName} - No block found at {steamTransportLocation} ({forgeDirection})");
+								continue;
+							}
+							Console.WriteLine($"{threadName} - Block found at {steamTransportLocation} ({forgeDirection})");
+
+							SteamTransportTopology currentTopology = steamTransportAtLocation.GetTopology();
+							if (currentTopology == null || currentTopology.IsSupercededBy(newTopology))
+							{
+								Console.WriteLine($"{threadName} - Found a block to replace at {steamTransportLocation}");
+								todoList.Push(steamTransportLocation);
+							}
+							else if (!currentTopology.Equals(newTopology) && currentTopology.IsSameGenerationAs(newTopology))
+							{
+								//This check might not be nessessary in Java
+								if (currentTopology.HasPriorityOver(newTopology) && !topologiesToMerge.Contains(currentTopology))
+								{
+									topologiesToMerge.Add(currentTopology);
+									Console.WriteLine($"{threadName} - Plan to merge {currentTopology} to {newTopology}");
+								}
 							}
 						}
 					}
@@ -59,7 +82,7 @@ namespace SteamNSteel.Impl.Jobs
 
 			foreach (SteamTransportTopology topology in topologiesToMerge)
 			{
-				Console.WriteLine("Merging Topology {0} into {1}", topology, newTopology);
+				Console.WriteLine($"{threadName} - Merging Topology {topology} into {newTopology}");
 				lock (topology.GetLockObject())
 				{
 					foreach (SteamTransport transport in topology.GetTransports())

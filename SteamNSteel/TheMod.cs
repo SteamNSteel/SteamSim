@@ -26,5 +26,10 @@ namespace SteamNSteel
 		{
 			SteamTransportStateMachine.OnTick();
         }
+
+		public static void PostTick()
+		{
+			SteamTransportStateMachine.PostTick();
+		}
 	}
 }

@@ -55,8 +55,10 @@ namespace SteamPipes
                         tileEntity.OnTick();
                     }
                 }
-	            
-                var thisTick = DateTime.Now;
+
+				TheMod.PostTick();
+
+				var thisTick = DateTime.Now;
                 _previousTick = thisTick;
 
 	            var timeSpan = tps - (DateTime.Now - _previousTick);

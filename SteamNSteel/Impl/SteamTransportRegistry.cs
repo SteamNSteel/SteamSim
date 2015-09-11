@@ -41,8 +41,7 @@ namespace SteamNSteel.Impl
                 if (!foundTransport.CanConnect(oppositeDirection)) continue;
 
 				TheMod.SteamTransportStateMachine.DeactivateTopology(foundTransport.GetTopology());
-				TheMod.SteamTransportStateMachine.AddPendingTopologyChange(foundTransport.GetTransportLocation());
-	            
+				//TheMod.SteamTransportStateMachine.AddPendingTopologyChange(foundTransport.GetTransportLocation());
 				
                 result.SetAdjacentTransport(direction, foundTransport);
                 foundTransport.SetAdjacentTransport(oppositeDirection, result);

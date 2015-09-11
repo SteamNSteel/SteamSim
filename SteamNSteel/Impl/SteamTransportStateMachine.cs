@@ -3,22 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using SteamNSteel.Impl.Jobs;
 using SteamNSteel.Jobs;
 
 namespace SteamNSteel.Impl
 {
-	public class SteamTransportStateMachine : INotifyTopologyCalculated
+	public class SteamTransportStateMachine : INotifyTopologyCalculated, INotifyIdealCondenstationComplete
 	{
-		private readonly List<SteamTransportTopology> ActiveTopologies = new List<SteamTransportTopology>();
-		private readonly List<SteamTransportLocation> PendingTopologyChanges = new List<SteamTransportLocation>();
-		private readonly List<SteamTransportTopology> NewTopologies = new List<SteamTransportTopology>();
-		private readonly object PendingTopologyListLock = new object();
-        private long topologyGeneration = 0;
+		private readonly List<SteamTransportTopology> _activeTopologies = new List<SteamTransportTopology>();
+		private readonly List<SteamTransportLocation> _pendingTopologyChanges = new List<SteamTransportLocation>();
+		private readonly List<SteamTransportTopology> _newTopologies = new List<SteamTransportTopology>();
+		private readonly object _pendingTopologyListLock = new object();
+        private long _topologyGeneration = 0;
+		private Barrier barrier = new Barrier(2);
+		private int _pendingTopologiesToProcess = 0;
 
 		public void OnTick()
 		{
-			if (PendingTopologyChanges.Count > 0)
+			if (_pendingTopologyChanges.Count > 0)
 			{
 				ProcessTopologyChanges();
 			}
@@ -28,61 +31,67 @@ namespace SteamNSteel.Impl
 			}
 		}
 
+		public void PostTick()
+		{
+			barrier.SignalAndWait();
+		}
+
 		private void ProcessTopologyChanges()
 		{
-			topologyGeneration++;
-			Console.WriteLine("Processing Topology Changes: Generation #{0}", topologyGeneration);
-			lock (PendingTopologyListLock)
+			_topologyGeneration++;
+			Console.WriteLine("Processing Topology Changes: Generation #{0}", _topologyGeneration);
+			lock (_pendingTopologyListLock)
 			{
-				foreach (var steamTransportLocation in PendingTopologyChanges)
+				foreach (var steamTransportLocation in _pendingTopologyChanges)
 				{
-					TheMod.JobManager.AddBackgroundJob(new RecalculateTopologyJob(steamTransportLocation, topologyGeneration, this));
+					_pendingTopologiesToProcess++;
+                    TheMod.JobManager.AddBackgroundJob(new RecalculateTopologyJob(steamTransportLocation, _topologyGeneration, this));
 				}
+				_pendingTopologyChanges.Clear();
 			}
 		}
 
 		public void AddPendingTopologyChange(SteamTransportLocation steamTransportLocation)
 		{
-			lock (PendingTopologyListLock)
+			lock (_pendingTopologyListLock)
 			{
-				PendingTopologyChanges.Add(steamTransportLocation);
+				_pendingTopologyChanges.Add(steamTransportLocation);
+				Console.WriteLine($"PendingTopologyChanges: {_pendingTopologyChanges.Count}");
 			}
 		}
 
 		internal void DeactivateTopology(SteamTransportTopology topology)
 		{
-			ActiveTopologies.Remove(topology);
+			_activeTopologies.Remove(topology);
 		}
 
 		public void TopologyCalculated(RecalculateTopologyJob.Result result)
 		{
-			Console.WriteLine("Topology calculated {0}", result.NewTopology);
-			bool moveToNextState = false;
-			
-			lock (PendingTopologyListLock)
+			Console.WriteLine($"{Thread.CurrentThread.Name} - Topology calculated {result.NewTopology}");
+
+			lock (_pendingTopologyListLock)
 			{
-				NewTopologies.Add(result.NewTopology);
-				PendingTopologyChanges.RemoveAt(PendingTopologyChanges.Count - 1);
-				if (!PendingTopologyChanges.Any())
-				{
-					moveToNextState = true;
-				}
+				_newTopologies.Add(result.NewTopology);
 			}
+
+			bool moveToNextState = Interlocked.Decrement(ref _pendingTopologiesToProcess) == 0;
+
+			
 
 			if (moveToNextState)
 			{
-				Console.WriteLine("Cleaning Topologies");
-				foreach (var topology in NewTopologies)
+				Console.WriteLine($"{Thread.CurrentThread.Name} - Cleaning Topologies");
+				foreach (var topology in _newTopologies)
 				{
 					if (topology.GetTransports().Any())
 					{
-						ActiveTopologies.Add(topology);
+						_activeTopologies.Add(topology);
 					}
 				}
-				NewTopologies.Clear();
+				_newTopologies.Clear();
 
-				Console.WriteLine("Processing Ideal Condensation");
-				foreach (var topology in ActiveTopologies)
+				Console.WriteLine($"{Thread.CurrentThread.Name} - Processing Ideal Condensation");
+				foreach (var topology in _activeTopologies)
 				{
 					Console.WriteLine("Active Topology: {0}", topology);
 				}
@@ -92,12 +101,28 @@ namespace SteamNSteel.Impl
 
 		private void ProcessIdealCondensation()
 		{
+			TheMod.JobManager.AddBackgroundJob(new CalculateIdealCondensationJob(this));
 			
+		}
+
+		private void Finished()
+		{
+			barrier.SignalAndWait();
+		}
+
+		public void IdealCondensationCalculated(CalculateIdealCondensationJob.Result result)
+		{
+			Finished();
 		}
 	}
 
 	public interface INotifyTopologyCalculated
 	{
 		void TopologyCalculated(RecalculateTopologyJob.Result result);
+	}
+
+	public interface INotifyIdealCondenstationComplete
+	{
+		void IdealCondensationCalculated(CalculateIdealCondensationJob.Result result);
 	}
 }

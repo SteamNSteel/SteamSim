@@ -57,5 +57,10 @@ namespace SteamNSteel.Impl
 			//Fixme: Use a pool?
 		    return new SteamTransportLocation(X + direction.offsetX, Y + direction.offsetY, Z + direction.offsetZ, WorldId);
 	    }
+
+	    public override string ToString()
+	    {
+		    return $"STL [{X}, {Y}, {Z}]";
+	    }
     }
 }

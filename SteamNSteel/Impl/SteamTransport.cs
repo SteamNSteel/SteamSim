@@ -27,8 +27,9 @@ namespace SteamNSteel.Impl
         readonly bool[] _canConnect = new bool[6];
 
         private bool _debug;
-        
-        public void AddSteam(int unitsOfSteam)
+	    public readonly object _syncObj = new object();
+
+	    public void AddSteam(int unitsOfSteam)
         {
             if (_steamStored + unitsOfSteam >= _maximumSteam)
             {   
