@@ -6,9 +6,15 @@ namespace SteamNSteel.Impl
 {
 	public class SteamTransportStateMachine
 	{
+		public SteamTransportStateMachine()
+		{
+			_steamNSteelConfiguration = new SteamNSteelConfiguration();
+		}
+
 		private IDictionary<SteamTransportLocation, ProcessTransportJob> IndividualTransportJobs = new Dictionary<SteamTransportLocation, ProcessTransportJob>();
 
 		private Barrier barrier = new Barrier(2);
+		private SteamNSteelConfiguration _steamNSteelConfiguration;
 
 		public void OnTick()
 		{
@@ -32,7 +38,8 @@ namespace SteamNSteel.Impl
 
 		internal void AddTransport(SteamTransport result)
 		{
-			IndividualTransportJobs.Add(result.GetTransportLocation(), new ProcessTransportJob(result));
+			
+			IndividualTransportJobs.Add(result.GetTransportLocation(), new ProcessTransportJob(result, _steamNSteelConfiguration));
 		}
 	}
 }

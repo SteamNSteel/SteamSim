@@ -8,6 +8,7 @@ namespace SteamNSteel.Impl.Jobs
 	public class ProcessTransportJob : IJob
 	{
 		private readonly SteamTransport unit;
+		private readonly List<ISteamTransport> eligibleUnits = new List<ISteamTransport>();
 		private readonly SteamNSteelConfiguration _config;
 		private SteamTransport[] _horizontalAdjacentTransports;
 
@@ -19,13 +20,18 @@ namespace SteamNSteel.Impl.Jobs
 
 		public void Execute()
 		{
-			_horizontalAdjacentTransports = new[]
+			if (unit.ChangedLastTick)
 			{
-				(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.NORTH),
-				(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.EAST),
-				(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.SOUTH),
-				(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.WEST),
-			};
+				_horizontalAdjacentTransports = new[]
+				{
+					(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.NORTH),
+					(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.EAST),
+					(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.SOUTH),
+					(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.WEST)
+				};
+
+				unit.ChangedLastTick = false;
+			}
 
 			TransferSteam();
 			CalculateUnitHeat();
@@ -74,6 +80,7 @@ namespace SteamNSteel.Impl.Jobs
 			{
 				TransferSteamAbove(usableSteam);
 			}
+
 			if (usableSteam > 0)
 			{
 				TransferSteamAcross(usableSteam);
@@ -82,7 +89,7 @@ namespace SteamNSteel.Impl.Jobs
 
 		private void TransferSteamAcross(double usableSteam)
 		{
-			var eligibleUnits = new List<ISteamTransport>();
+			eligibleUnits.Clear();
 			double steamSpaceAvailable = 0;
 
 			foreach (var neighbourUnit in _horizontalAdjacentTransports)
@@ -91,6 +98,7 @@ namespace SteamNSteel.Impl.Jobs
 				{
 					continue;
 				}
+
 				//Steam providers can always push?
 				var neighbourSteamStored = neighbourUnit.GetSteamStored();
 				var neighbourMaximumSteam = neighbourUnit.GetCalculatedMaximumSteam();
@@ -100,6 +108,7 @@ namespace SteamNSteel.Impl.Jobs
 					steamSpaceAvailable += (neighbourMaximumSteam - neighbourSteamStored);
 				}
 			}
+
 			var transportBelow = unit.GetAdjacentTransport(ForgeDirection.NORTH);
             if (transportBelow != null && unit.GetCalculatedSteamDensity() >= _config.EQUILIBRIUM && !unit.SteamFlowSourceUnits.Contains(transportBelow))
 			{
@@ -165,6 +174,7 @@ namespace SteamNSteel.Impl.Jobs
 			{
 				TransferWaterBelow(usableWater);
 			}
+
 			if (usableWater > 0 && _horizontalAdjacentTransports.Any())
 			{
 				TransferWaterAcross(usableWater);
@@ -173,8 +183,9 @@ namespace SteamNSteel.Impl.Jobs
 
 		private void TransferWaterAcross(decimal waterUsedAtStart)
 		{
-			var eligibleUnits = new List<SteamTransport>();
+			eligibleUnits.Clear();
 			decimal waterSpaceAvailable = 0;
+			
 			foreach (var neighbourUnit in _horizontalAdjacentTransports)
 			{
 				if (unit.WaterFlowSourceUnits.Contains(neighbourUnit))
@@ -184,9 +195,7 @@ namespace SteamNSteel.Impl.Jobs
 
 				var neighbourWaterStored = neighbourUnit.GetWaterStored();
 				var neighbourMaximumWater = neighbourUnit.GetMaximumWater();
-				//Steam providers can always push?
-				if (neighbourWaterStored < neighbourMaximumWater &&
-					(neighbourWaterStored < waterUsedAtStart))
+				if (neighbourWaterStored < neighbourMaximumWater && neighbourWaterStored < waterUsedAtStart)
 				{
 					eligibleUnits.Add(neighbourUnit);
 					waterSpaceAvailable += (neighbourMaximumWater - neighbourWaterStored);
@@ -217,10 +226,10 @@ namespace SteamNSteel.Impl.Jobs
 
 		private void TransferWaterBelow(decimal usableWater)
 		{
-			
 			var unitAbove = unit.GetAdjacentTransport(ForgeDirection.DOWN);
 			var neighbourWaterStored = unitAbove.GetWaterStored();
 			var neighbourMaximumWater = unitAbove.GetMaximumWater();
+
 			if (neighbourWaterStored <= neighbourMaximumWater)
 			{
 				var amountTransferred = usableWater;
