@@ -46,8 +46,7 @@
     <Compile Include="API\PointI2D.cs" />
     <Compile Include="API\SteamManager.cs" />
     <Compile Include="API\SteamUnit.cs" />
-    <Compile Include="Impl\Jobs\CalculateIdealCondensationJob.cs" />
-    <Compile Include="Impl\Jobs\RecalculateTopologyJob.cs" />
+    <Compile Include="Impl\Jobs\ProcessTransportJob.cs" />
     <Compile Include="Impl\SteamTransport.cs" />
     <Compile Include="Impl\SteamTransportLocation.cs" />
     <Compile Include="Impl\SteamTransportRegistry.cs" />
