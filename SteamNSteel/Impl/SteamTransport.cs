@@ -19,6 +19,7 @@ namespace SteamNSteel.Impl
         private int _steamStored = 0;
 
         private double _temperature;
+	    private double _heatConductivity;
 
         private int _maximumWater;
         private int _maximumSteam;
@@ -128,7 +129,17 @@ namespace SteamNSteel.Impl
             return _temperature;
         }
 
-        public double GetCalculatedSteamDensity()
+		public void SetTemperature(double temperature)
+		{
+			_temperature = temperature;
+		}
+
+		public double GetHeatConductivity()
+		{
+			return _heatConductivity;
+		}
+
+		public double GetCalculatedSteamDensity()
         {
             var calculatedMaximumSteam = GetCalculatedMaximumSteam();
             if (calculatedMaximumSteam <= 0)

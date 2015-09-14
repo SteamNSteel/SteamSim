@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Steam.API;
 using SteamNSteel.Jobs;
 
@@ -10,14 +8,25 @@ namespace SteamNSteel.Impl.Jobs
 	public class ProcessTransportJob : IJob
 	{
 		private readonly SteamTransport unit;
+		private readonly SteamNSteelConfiguration _config;
+		private SteamTransport[] _horizontalAdjacentTransports;
 
-		internal ProcessTransportJob(SteamTransport unit)
+		internal ProcessTransportJob(SteamTransport unit, SteamNSteelConfiguration config)
 		{
 			this.unit = unit;
+			_config = config;
 		}
 
 		public void Execute()
 		{
+			_horizontalAdjacentTransports = new[]
+			{
+				(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.NORTH),
+				(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.EAST),
+				(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.SOUTH),
+				(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.WEST),
+			};
+
 			TransferSteam();
 			CalculateUnitHeat();
 			TransferWater();
@@ -26,24 +35,22 @@ namespace SteamNSteel.Impl.Jobs
 
 		private void CondenseSteam()
 		{
-			var usableSteam = unit.SteamStored - unit.NewSteam;
+			var steamStored = unit.GetSteamStored();
+
+			var usableSteam = steamStored - unit.NewSteam;
 			if (usableSteam <= 0) return;
 
-			var newCondensation = usableSteam * CondensationRatePerTick * ((100 - unit.Temperature) / 100) * TicksPerSecond * timeElapsed;
-
-			if (unit.SteamStored - newCondensation < 0)
-			{
-				newCondensation = unit.SteamStored;
-			}
-			var waterGained = newCondensation * SteamToWaterRatio;
-			unit.SteamStored -= newCondensation;
-			unit.WaterStored += waterGained;
+			var newCondensation = usableSteam * _config.CondensationRatePerTick * ((100 - unit.GetTemperature()) / 100) * _config.TickLength;
+			newCondensation = unit.TakeSteam((int)newCondensation);
+			var waterGained = newCondensation * _config.SteamToWaterRatio;
+			unit.AddCondensate((int)waterGained);
 		}
 
 		private void CalculateUnitHeat()
 		{
-			var tempDifference = unit.SteamDensity - (double)unit.Temperature;
-			var temperature = unit.Temperature + (unit.HeatConductivity * (decimal)(tempDifference / 100));
+			var unitTemperature = unit.GetTemperature();
+			var tempDifference = unit.GetCalculatedSteamDensity() - unitTemperature;
+			var temperature = unitTemperature + (unit.GetHeatConductivity() * (tempDifference / 100));
 			if (temperature > 100)
 			{
 				temperature = 100;
@@ -52,158 +59,158 @@ namespace SteamNSteel.Impl.Jobs
 			{
 				temperature = 0;
 			}
-			unit.Temperature = temperature;
+			unit.SetTemperature(temperature);
 		}
 
 		private void TransferSteam()
 		{
-			var usableSteam = unit.SteamStored - unit.NewSteam;
+			var usableSteam = unit.GetSteamStored() - unit.NewSteam;
 
 			if (usableSteam <= 0) return;
+
+			var unitAbove = unit.GetAdjacentTransport(ForgeDirection.UP);
 			//First, work on any units above
-			if (unit.UnitAbove != null && !unit.SteamFlowSourceUnits.Contains(unit.UnitAbove))
+			if (unitAbove != null && !unit.SteamFlowSourceUnits.Contains(unitAbove))
 			{
-				TransferSteamAbove(unit, usableSteam, timeElapsed);
+				TransferSteamAbove(usableSteam);
 			}
 			if (usableSteam > 0)
 			{
-				TransferSteamAcross(unit, usableSteam, timeElapsed);
+				TransferSteamAcross(usableSteam);
 			}
 		}
 
-		private void TransferSteamAcross(SteamUnit unit, decimal usableSteam)
+		private void TransferSteamAcross(double usableSteam)
 		{
-			var eligibleUnits = new List<SteamUnit>();
-			decimal steamSpaceAvailable = 0;
-			foreach (var neighbourUnit in unit.HorizontalAdjacentConnections)
+			var eligibleUnits = new List<ISteamTransport>();
+			double steamSpaceAvailable = 0;
+
+			foreach (var neighbourUnit in _horizontalAdjacentTransports)
 			{
 				if (unit.SteamFlowSourceUnits.Contains(neighbourUnit))
 				{
 					continue;
 				}
 				//Steam providers can always push?
-				if (neighbourUnit.SteamStored < neighbourUnit.ActualMaxSteam &&
-					(neighbourUnit.SteamStored < usableSteam))
+				var neighbourSteamStored = neighbourUnit.GetSteamStored();
+				var neighbourMaximumSteam = neighbourUnit.GetCalculatedMaximumSteam();
+				if (neighbourSteamStored < neighbourMaximumSteam && neighbourSteamStored < usableSteam)
 				{
 					eligibleUnits.Add(neighbourUnit);
-					steamSpaceAvailable += (neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored);
+					steamSpaceAvailable += (neighbourMaximumSteam - neighbourSteamStored);
 				}
 			}
-
-			if (unit.UnitBelow != null && unit.SteamDensity >= EQUILIBRIUM && !unit.SteamFlowSourceUnits.Contains(unit.UnitBelow))
+			var transportBelow = unit.GetAdjacentTransport(ForgeDirection.NORTH);
+            if (transportBelow != null && unit.GetCalculatedSteamDensity() >= _config.EQUILIBRIUM && !unit.SteamFlowSourceUnits.Contains(transportBelow))
 			{
-				var neighbourUnit = unit.UnitBelow;
-				if (neighbourUnit.SteamStored < neighbourUnit.ActualMaxSteam &&
-					(neighbourUnit.SteamStored < usableSteam))
+				var neighbourSteamStored = transportBelow.GetSteamStored();
+				var neighbourMaximumSteam = transportBelow.GetCalculatedMaximumSteam();
+				if (neighbourSteamStored < neighbourMaximumSteam && neighbourSteamStored < usableSteam)
 				{
-					eligibleUnits.Add(neighbourUnit);
-					steamSpaceAvailable += (neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored);
+					eligibleUnits.Add(transportBelow);
+					steamSpaceAvailable += (neighbourMaximumSteam - neighbourSteamStored);
 				}
 			}
 
 			var originalSteamStored = usableSteam;
 			foreach (var neighbourUnit in eligibleUnits)
 			{
-				var ratio = (neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored) / steamSpaceAvailable;
+				var neighbourSteamStored = neighbourUnit.GetSteamStored();
+				var neighbourMaximumSteam = neighbourUnit.GetCalculatedMaximumSteam();
+				var ratio = (neighbourMaximumSteam - neighbourSteamStored) / steamSpaceAvailable;
 
-				var amountTransferred = originalSteamStored * timeElapsed * ratio;
+				var amountTransferred = originalSteamStored * ratio;
 
-				if (neighbourUnit.SteamStored + amountTransferred > neighbourUnit.ActualMaxSteam)
+				if (neighbourSteamStored + amountTransferred > neighbourMaximumSteam)
 				{
-					amountTransferred = neighbourUnit.ActualMaxSteam - neighbourUnit.SteamStored;
+					amountTransferred = neighbourMaximumSteam - neighbourSteamStored;
 				}
 
-				amountTransferred = amountTransferred * TransferRatio;
-				if (unit.SteamStored - amountTransferred < 0)
-				{
-					amountTransferred = unit.SteamStored;
-				}
+				amountTransferred = amountTransferred * _config.TransferRatio;
 
-				neighbourUnit.SteamStored += amountTransferred;
-				neighbourUnit.NewSteam += amountTransferred;
-				unit.SteamStored -= amountTransferred;
+				amountTransferred = unit.TakeSteam((int)amountTransferred);
+				unit.AddSteam((int)amountTransferred);
 				neighbourUnit.SteamFlowSourceUnits.Add(unit);
 			}
 		}
 
 		private void TransferSteamAbove(decimal usableSteam)
 		{
-			var unitAbove = unit.UnitAbove;
-			if (unitAbove.SteamStored <= unitAbove.ActualMaxSteam)
+			var unitAbove = unit.GetAdjacentTransport(ForgeDirection.UP);
+			var neighbourSteamStored = unitAbove.GetSteamStored();
+			var neighbourMaximumSteam = unitAbove.GetCalculatedMaximumSteam();
+			if (neighbourSteamStored <= neighbourMaximumSteam)
 			{
-				var amountTransferred = usableSteam * timeElapsed;
+				var amountTransferred = usableSteam;
 
-				if (unitAbove.SteamStored + amountTransferred > unitAbove.ActualMaxSteam)
+				if (neighbourSteamStored + amountTransferred > neighbourMaximumSteam)
 				{
-					amountTransferred = unitAbove.ActualMaxSteam - unitAbove.SteamStored;
+					amountTransferred = neighbourMaximumSteam - neighbourSteamStored;
 				}
 
-				if (usableSteam - amountTransferred < 0)
-				{
-					amountTransferred = usableSteam;
-				}
-				unitAbove.SteamStored += amountTransferred;
-				unitAbove.NewSteam += amountTransferred;
-				unit.SteamStored -= amountTransferred;
+				amountTransferred = unit.TakeSteam((int)amountTransferred);
+				unitAbove.AddSteam((int)amountTransferred);
 				unitAbove.SteamFlowSourceUnits.Add(unit);
 			}
 		}
 
 		private void TransferWater()
 		{
-			var usableWater = unit.WaterStored - unit.NewWater;
+			var usableWater = unit.GetWaterStored() - unit.NewWater;
 
 			if (usableWater <= 0) return;
+			var unitBelow = unit.GetAdjacentTransport(ForgeDirection.DOWN);
 			//First, work on any units above
-			if (unit.UnitBelow != null && !unit.WaterFlowSourceUnits.Contains(unit.UnitBelow))
+			if (unitBelow != null && !unit.WaterFlowSourceUnits.Contains(unitBelow))
 			{
-				TransferWaterBelow(unit, usableWater, timeElapsed);
+				TransferWaterBelow(usableWater);
 			}
-			if (usableWater > 0 && unit.HorizontalAdjacentConnections.Any())
+			if (usableWater > 0 && _horizontalAdjacentTransports.Any())
 			{
-				TransferWaterAcross(unit, usableWater, timeElapsed);
+				TransferWaterAcross(usableWater);
 			}
 		}
 
-		private static void TransferWaterAcross(decimal waterUsedAtStart)
+		private void TransferWaterAcross(decimal waterUsedAtStart)
 		{
-			var eligibleUnits = new List<SteamUnit>();
+			var eligibleUnits = new List<SteamTransport>();
 			decimal waterSpaceAvailable = 0;
-			foreach (var neighbourUnit in unit.HorizontalAdjacentConnections)
+			foreach (var neighbourUnit in _horizontalAdjacentTransports)
 			{
 				if (unit.WaterFlowSourceUnits.Contains(neighbourUnit))
 				{
 					continue;
 				}
+
+				var neighbourWaterStored = neighbourUnit.GetWaterStored();
+				var neighbourMaximumWater = neighbourUnit.GetMaximumWater();
 				//Steam providers can always push?
-				if (neighbourUnit.WaterStored < neighbourUnit.MaxWater &&
-					(neighbourUnit.WaterStored < waterUsedAtStart))
+				if (neighbourWaterStored < neighbourMaximumWater &&
+					(neighbourWaterStored < waterUsedAtStart))
 				{
 					eligibleUnits.Add(neighbourUnit);
-					waterSpaceAvailable += (neighbourUnit.MaxWater - neighbourUnit.WaterStored);
+					waterSpaceAvailable += (neighbourMaximumWater - neighbourWaterStored);
 				}
 			}
 
 			var originalWaterStored = waterUsedAtStart;
 			foreach (var neighbourUnit in eligibleUnits)
 			{
-				var ratio = (neighbourUnit.MaxWater - neighbourUnit.WaterStored) / waterSpaceAvailable;
+				var neighbourWaterStored = neighbourUnit.GetWaterStored();
+				var neighbourMaximumWater = neighbourUnit.GetMaximumWater();
 
-				var amountTransferred = originalWaterStored * timeElapsed * ratio;
+				var ratio = (neighbourMaximumWater - neighbourWaterStored) / waterSpaceAvailable;
 
-				if (neighbourUnit.WaterStored + amountTransferred > neighbourUnit.MaxWater)
+				var amountTransferred = originalWaterStored * ratio;
+
+				if (neighbourWaterStored + amountTransferred > neighbourMaximumWater)
 				{
-					amountTransferred = neighbourUnit.MaxWater - neighbourUnit.WaterStored;
+					amountTransferred = neighbourMaximumWater - neighbourWaterStored;
 				}
 
-				if (unit.WaterStored - amountTransferred < 0)
-				{
-					amountTransferred = unit.WaterStored;
-				}
-
-				neighbourUnit.WaterStored += amountTransferred;
-				neighbourUnit.NewWater += amountTransferred;
-				unit.WaterStored -= amountTransferred;
+				amountTransferred = unit.TakeCondensate((int)amountTransferred);
+				neighbourUnit.AddCondensate((int)amountTransferred);
+				
 				neighbourUnit.WaterFlowSourceUnits.Add(unit);
 			}
 		}
@@ -211,24 +218,26 @@ namespace SteamNSteel.Impl.Jobs
 		private void TransferWaterBelow(decimal usableWater)
 		{
 			
-			var unitBelow = unit.GetAdjacentTransport(ForgeDirection.DOWN);
-			if (unitBelow.WaterStored <= unitBelow.MaxWater)
+			var unitAbove = unit.GetAdjacentTransport(ForgeDirection.DOWN);
+			var neighbourWaterStored = unitAbove.GetWaterStored();
+			var neighbourMaximumWater = unitAbove.GetMaximumWater();
+			if (neighbourWaterStored <= neighbourMaximumWater)
 			{
-				var amountTransferred = usableWater * timeElapsed;
+				var amountTransferred = usableWater;
 
-				if (unitBelow.WaterStored + amountTransferred > unitBelow.MaxWater)
+				if (neighbourWaterStored + amountTransferred > neighbourMaximumWater)
 				{
-					amountTransferred = unitBelow.MaxWater - unitBelow.WaterStored;
+					amountTransferred = neighbourMaximumWater - neighbourWaterStored;
 				}
 
 				if (usableWater - amountTransferred < 0)
 				{
 					amountTransferred = usableWater;
 				}
-				unitBelow.WaterStored += amountTransferred;
-				unitBelow.NewWater += amountTransferred;
-				unit.WaterStored -= amountTransferred;
-				unitBelow.WaterFlowSourceUnits.Add(unit);
+
+				amountTransferred = unit.TakeCondensate((int) amountTransferred);
+				unitAbove.AddCondensate((int)amountTransferred);
+				unitAbove.WaterFlowSourceUnits.Add(unit);
 			}
 		}
 	}

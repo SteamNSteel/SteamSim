@@ -47,6 +47,7 @@
     <Compile Include="API\SteamManager.cs" />
     <Compile Include="API\SteamUnit.cs" />
     <Compile Include="Impl\Jobs\ProcessTransportJob.cs" />
+    <Compile Include="SteamNSteelConfiguration.cs" />
     <Compile Include="Impl\SteamTransport.cs" />
     <Compile Include="Impl\SteamTransportLocation.cs" />
     <Compile Include="Impl\SteamTransportRegistry.cs" />
