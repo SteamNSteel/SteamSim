@@ -7,30 +7,27 @@ namespace SteamNSteel.Impl.Jobs
 {
 	public class ProcessTransportJob : IJob
 	{
-		private readonly SteamTransport unit;
-		private readonly List<ISteamTransport> eligibleUnits = new List<ISteamTransport>();
+		private readonly SteamTransport _transport;
+		private readonly List<SteamTransportTransientData> _eligibleTransportData = new List<SteamTransportTransientData>();
 		private readonly SteamNSteelConfiguration _config;
-		private SteamTransport[] _horizontalAdjacentTransports;
+		private SteamTransportTransientData[] _horizontalAdjacentTransports;
+		private SteamTransportTransientData _transportData;
+		private SteamTransportTransientData _transportAbove;
+		private SteamTransportTransientData _transportBelow;
 
-		internal ProcessTransportJob(SteamTransport unit, SteamNSteelConfiguration config)
+		internal ProcessTransportJob(SteamTransport transport, SteamNSteelConfiguration config)
 		{
-			this.unit = unit;
+			_transport = transport;
 			_config = config;
 		}
 
 		public void Execute()
 		{
-			if (unit.ChangedLastTick)
+			if (_transport.ChangedLastTick)
 			{
-				_horizontalAdjacentTransports = new[]
-				{
-					(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.NORTH),
-					(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.EAST),
-					(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.SOUTH),
-					(SteamTransport)unit.GetAdjacentTransport(ForgeDirection.WEST)
-				};
+				UpdateLocalData();
 
-				unit.ChangedLastTick = false;
+				_transport.ChangedLastTick = false;
 			}
 
 			TransferSteam();
@@ -39,24 +36,60 @@ namespace SteamNSteel.Impl.Jobs
 			CondenseSteam();
 		}
 
+		private void UpdateLocalData()
+		{
+			var stateMachine = TheMod.SteamTransportStateMachine;
+			List<SteamTransportTransientData> adjacentTransports = new List<SteamTransportTransientData>();
+
+			var adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.NORTH);
+			if (adjacentTransport != null)
+			{
+				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
+			}
+			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.EAST);
+			if (adjacentTransport != null)
+			{
+				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
+			}
+			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.SOUTH);
+			if (adjacentTransport != null)
+			{
+				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
+			}
+			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.WEST);
+			if (adjacentTransport != null)
+			{
+				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
+			}
+			_horizontalAdjacentTransports = adjacentTransports.ToArray();
+
+			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.UP);
+			_transportAbove = adjacentTransport == null ? null : stateMachine.GetJobDataForTransport(adjacentTransport);
+			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.DOWN);
+			_transportBelow = adjacentTransport == null ? null : stateMachine.GetJobDataForTransport(adjacentTransport);
+
+			_transportData = stateMachine.GetJobDataForTransport(_transport);
+		}
+
 		private void CondenseSteam()
 		{
-			var steamStored = unit.GetSteamStored();
+			var steamStored = _transport.GetSteamStored();
 
-			var usableSteam = steamStored - unit.NewSteam;
+			var usableSteam = steamStored - _transportData.newSteam;
 			if (usableSteam <= 0) return;
 
-			var newCondensation = usableSteam * _config.CondensationRatePerTick * ((100 - unit.GetTemperature()) / 100) * _config.TickLength;
-			newCondensation = unit.TakeSteam((int)newCondensation);
+			var newCondensation = usableSteam * _config.CondensationRatePerTick * ((100 - _transport.GetTemperature()) / 100) * _config.TickLength;
+			newCondensation = _transport.TakeSteam((int)newCondensation);
 			var waterGained = newCondensation * _config.SteamToWaterRatio;
-			unit.AddCondensate((int)waterGained);
+			_transport.AddCondensate((int)waterGained);
+			_transportData.newCondensation += (int) waterGained;
 		}
 
 		private void CalculateUnitHeat()
 		{
-			var unitTemperature = unit.GetTemperature();
-			var tempDifference = unit.GetCalculatedSteamDensity() - unitTemperature;
-			var temperature = unitTemperature + (unit.GetHeatConductivity() * (tempDifference / 100));
+			var unitTemperature = _transport.GetTemperature();
+			var tempDifference = _transport.GetCalculatedSteamDensity() - unitTemperature;
+			var temperature = unitTemperature + (_transport.GetHeatConductivity() * (tempDifference / 100));
 			if (temperature > 100)
 			{
 				temperature = 100;
@@ -65,18 +98,17 @@ namespace SteamNSteel.Impl.Jobs
 			{
 				temperature = 0;
 			}
-			unit.SetTemperature(temperature);
+			_transport.SetTemperature(temperature);
 		}
 
 		private void TransferSteam()
 		{
-			var usableSteam = unit.GetSteamStored() - unit.NewSteam;
+			var usableSteam = _transport.GetSteamStored() - _transportData.newSteam;
 
 			if (usableSteam <= 0) return;
 
-			var unitAbove = unit.GetAdjacentTransport(ForgeDirection.UP);
 			//First, work on any units above
-			if (unitAbove != null && !unit.SteamFlowSourceUnits.Contains(unitAbove))
+			if (_transportAbove != null && !_transportData.SteamFlowSourceUnits.Contains(_transportAbove))
 			{
 				TransferSteamAbove(usableSteam);
 			}
@@ -89,43 +121,42 @@ namespace SteamNSteel.Impl.Jobs
 
 		private void TransferSteamAcross(double usableSteam)
 		{
-			eligibleUnits.Clear();
+			_eligibleTransportData.Clear();
 			double steamSpaceAvailable = 0;
 
 			foreach (var neighbourUnit in _horizontalAdjacentTransports)
 			{
-				if (unit.SteamFlowSourceUnits.Contains(neighbourUnit))
+				if (_transportData.SteamFlowSourceUnits.Contains(neighbourUnit))
 				{
 					continue;
 				}
 
 				//Steam providers can always push?
-				var neighbourSteamStored = neighbourUnit.GetSteamStored();
-				var neighbourMaximumSteam = neighbourUnit.GetCalculatedMaximumSteam();
+				var neighbourSteamStored = neighbourUnit.transport.GetSteamStored();
+				var neighbourMaximumSteam = neighbourUnit.transport.GetCalculatedMaximumSteam();
 				if (neighbourSteamStored < neighbourMaximumSteam && neighbourSteamStored < usableSteam)
 				{
-					eligibleUnits.Add(neighbourUnit);
+					_eligibleTransportData.Add(neighbourUnit);
 					steamSpaceAvailable += (neighbourMaximumSteam - neighbourSteamStored);
 				}
 			}
 
-			var transportBelow = unit.GetAdjacentTransport(ForgeDirection.NORTH);
-            if (transportBelow != null && unit.GetCalculatedSteamDensity() >= _config.EQUILIBRIUM && !unit.SteamFlowSourceUnits.Contains(transportBelow))
+            if (_transportBelow != null && _transport.GetCalculatedSteamDensity() >= _config.EQUILIBRIUM && !_transportData.SteamFlowSourceUnits.Contains(_transportBelow))
 			{
-				var neighbourSteamStored = transportBelow.GetSteamStored();
-				var neighbourMaximumSteam = transportBelow.GetCalculatedMaximumSteam();
+				var neighbourSteamStored = _transportBelow.transport.GetSteamStored();
+				var neighbourMaximumSteam = _transportBelow.transport.GetCalculatedMaximumSteam();
 				if (neighbourSteamStored < neighbourMaximumSteam && neighbourSteamStored < usableSteam)
 				{
-					eligibleUnits.Add(transportBelow);
+					_eligibleTransportData.Add(_transportBelow);
 					steamSpaceAvailable += (neighbourMaximumSteam - neighbourSteamStored);
 				}
 			}
 
 			var originalSteamStored = usableSteam;
-			foreach (var neighbourUnit in eligibleUnits)
+			foreach (var neighbourUnit in _eligibleTransportData)
 			{
-				var neighbourSteamStored = neighbourUnit.GetSteamStored();
-				var neighbourMaximumSteam = neighbourUnit.GetCalculatedMaximumSteam();
+				var neighbourSteamStored = neighbourUnit.transport.GetSteamStored();
+				var neighbourMaximumSteam = neighbourUnit.transport.GetCalculatedMaximumSteam();
 				var ratio = (neighbourMaximumSteam - neighbourSteamStored) / steamSpaceAvailable;
 
 				var amountTransferred = originalSteamStored * ratio;
@@ -137,17 +168,17 @@ namespace SteamNSteel.Impl.Jobs
 
 				amountTransferred = amountTransferred * _config.TransferRatio;
 
-				amountTransferred = unit.TakeSteam((int)amountTransferred);
-				unit.AddSteam((int)amountTransferred);
-				neighbourUnit.SteamFlowSourceUnits.Add(unit);
+				amountTransferred = _transport.TakeSteam((int)amountTransferred);
+				_transport.AddSteam((int)amountTransferred);
+				_transportData.newSteam += (int)amountTransferred;
+				neighbourUnit.SteamFlowSourceUnits.Add(_transportData);
 			}
 		}
 
 		private void TransferSteamAbove(decimal usableSteam)
 		{
-			var unitAbove = unit.GetAdjacentTransport(ForgeDirection.UP);
-			var neighbourSteamStored = unitAbove.GetSteamStored();
-			var neighbourMaximumSteam = unitAbove.GetCalculatedMaximumSteam();
+			var neighbourSteamStored = _transportAbove.transport.GetSteamStored();
+			var neighbourMaximumSteam = _transportAbove.transport.GetCalculatedMaximumSteam();
 			if (neighbourSteamStored <= neighbourMaximumSteam)
 			{
 				var amountTransferred = usableSteam;
@@ -157,20 +188,21 @@ namespace SteamNSteel.Impl.Jobs
 					amountTransferred = neighbourMaximumSteam - neighbourSteamStored;
 				}
 
-				amountTransferred = unit.TakeSteam((int)amountTransferred);
-				unitAbove.AddSteam((int)amountTransferred);
-				unitAbove.SteamFlowSourceUnits.Add(unit);
+				amountTransferred = _transport.TakeSteam((int)amountTransferred);
+				_transportAbove.transport.AddSteam((int)amountTransferred);
+				_transportData.newSteam += (int) amountTransferred;
+				_transportAbove.SteamFlowSourceUnits.Add(_transportData);
+				
 			}
 		}
 
 		private void TransferWater()
 		{
-			var usableWater = unit.GetWaterStored() - unit.NewWater;
+			var usableWater = _transport.GetWaterStored() - _transportData.newCondensation;
 
 			if (usableWater <= 0) return;
-			var unitBelow = unit.GetAdjacentTransport(ForgeDirection.DOWN);
 			//First, work on any units above
-			if (unitBelow != null && !unit.WaterFlowSourceUnits.Contains(unitBelow))
+			if (_transportBelow != null && !_transportData.WaterFlowSourceUnits.Contains(_transportBelow))
 			{
 				TransferWaterBelow(usableWater);
 			}
@@ -183,30 +215,30 @@ namespace SteamNSteel.Impl.Jobs
 
 		private void TransferWaterAcross(decimal waterUsedAtStart)
 		{
-			eligibleUnits.Clear();
+			_eligibleTransportData.Clear();
 			decimal waterSpaceAvailable = 0;
 			
 			foreach (var neighbourUnit in _horizontalAdjacentTransports)
 			{
-				if (unit.WaterFlowSourceUnits.Contains(neighbourUnit))
+				if (_transportData.WaterFlowSourceUnits.Contains(neighbourUnit))
 				{
 					continue;
 				}
 
-				var neighbourWaterStored = neighbourUnit.GetWaterStored();
-				var neighbourMaximumWater = neighbourUnit.GetMaximumWater();
+				var neighbourWaterStored = neighbourUnit.transport.GetWaterStored();
+				var neighbourMaximumWater = neighbourUnit.transport.GetMaximumWater();
 				if (neighbourWaterStored < neighbourMaximumWater && neighbourWaterStored < waterUsedAtStart)
 				{
-					eligibleUnits.Add(neighbourUnit);
+					_eligibleTransportData.Add(neighbourUnit);
 					waterSpaceAvailable += (neighbourMaximumWater - neighbourWaterStored);
 				}
 			}
 
 			var originalWaterStored = waterUsedAtStart;
-			foreach (var neighbourUnit in eligibleUnits)
+			foreach (var neighbourUnit in _eligibleTransportData)
 			{
-				var neighbourWaterStored = neighbourUnit.GetWaterStored();
-				var neighbourMaximumWater = neighbourUnit.GetMaximumWater();
+				var neighbourWaterStored = neighbourUnit.transport.GetWaterStored();
+				var neighbourMaximumWater = neighbourUnit.transport.GetMaximumWater();
 
 				var ratio = (neighbourMaximumWater - neighbourWaterStored) / waterSpaceAvailable;
 
@@ -217,18 +249,19 @@ namespace SteamNSteel.Impl.Jobs
 					amountTransferred = neighbourMaximumWater - neighbourWaterStored;
 				}
 
-				amountTransferred = unit.TakeCondensate((int)amountTransferred);
-				neighbourUnit.AddCondensate((int)amountTransferred);
+				amountTransferred = _transport.TakeCondensate((int)amountTransferred);
+				neighbourUnit.transport.AddCondensate((int)amountTransferred);
+				_transportData.newCondensation += (int) amountTransferred;
 				
-				neighbourUnit.WaterFlowSourceUnits.Add(unit);
+				neighbourUnit.WaterFlowSourceUnits.Add(_transportData);
 			}
 		}
 
 		private void TransferWaterBelow(decimal usableWater)
 		{
-			var unitAbove = unit.GetAdjacentTransport(ForgeDirection.DOWN);
-			var neighbourWaterStored = unitAbove.GetWaterStored();
-			var neighbourMaximumWater = unitAbove.GetMaximumWater();
+			//var unitAbove = _transport.GetAdjacentTransport(ForgeDirection.DOWN);
+			var neighbourWaterStored = _transportBelow.transport.GetWaterStored();
+			var neighbourMaximumWater = _transportBelow.transport.GetMaximumWater();
 
 			if (neighbourWaterStored <= neighbourMaximumWater)
 			{
@@ -244,9 +277,10 @@ namespace SteamNSteel.Impl.Jobs
 					amountTransferred = usableWater;
 				}
 
-				amountTransferred = unit.TakeCondensate((int) amountTransferred);
-				unitAbove.AddCondensate((int)amountTransferred);
-				unitAbove.WaterFlowSourceUnits.Add(unit);
+				amountTransferred = _transport.TakeCondensate((int) amountTransferred);
+				_transportBelow.transport.AddCondensate((int)amountTransferred);
+				_transportBelow.newCondensation += (int)amountTransferred;
+				_transportBelow.WaterFlowSourceUnits.Add(_transportData);
 			}
 		}
 	}

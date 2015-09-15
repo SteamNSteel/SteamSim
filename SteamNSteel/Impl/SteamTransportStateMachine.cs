@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
+using Steam.API;
 using SteamNSteel.Impl.Jobs;
 
 namespace SteamNSteel.Impl
@@ -12,7 +13,7 @@ namespace SteamNSteel.Impl
 		}
 
 		private IDictionary<SteamTransportLocation, ProcessTransportJob> IndividualTransportJobs = new Dictionary<SteamTransportLocation, ProcessTransportJob>();
-
+		private IDictionary<ISteamTransport, SteamTransportTransientData> TransientData = new Dictionary<ISteamTransport, SteamTransportTransientData>();
 		private Barrier barrier = new Barrier(2);
 		private SteamNSteelConfiguration _steamNSteelConfiguration;
 
@@ -40,6 +41,11 @@ namespace SteamNSteel.Impl
 		{
 			
 			IndividualTransportJobs.Add(result.GetTransportLocation(), new ProcessTransportJob(result, _steamNSteelConfiguration));
+		}
+
+		internal SteamTransportTransientData GetJobDataForTransport(ISteamTransport processTransportJob)
+		{
+			return TransientData[processTransportJob];
 		}
 	}
 }
