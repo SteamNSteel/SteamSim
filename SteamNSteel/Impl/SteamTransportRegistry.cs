@@ -16,8 +16,7 @@ namespace SteamNSteel.Impl
         {
             SteamTransportLocation steamTransportLocation = SteamTransportLocation.Create(x, y);
             SteamTransport result = SteamUnits.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
-	        TheMod.SteamTransportStateMachine.AddTransport(result);
-            bool[] allowedDirections = new bool[6];
+	        bool[] allowedDirections = new bool[6];
             
             foreach (ForgeDirection initialAllowedDirection in initialAllowedDirections)
             {
@@ -43,8 +42,8 @@ namespace SteamNSteel.Impl
                 result.SetAdjacentTransport(direction, foundTransport);
                 foundTransport.SetAdjacentTransport(oppositeDirection, result);
             }
-
-            return result;
+			TheMod.SteamTransportStateMachine.AddTransport(result);
+			return result;
         }
 
         public void DestroySteamTransport(int x, int y)

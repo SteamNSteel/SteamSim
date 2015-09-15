@@ -29,7 +29,7 @@ namespace SteamNSteel.Impl
 
         private bool _debug;
 	    public readonly object _syncObj = new object();
-	    public bool ChangedLastTick;
+	    public bool StructureChanged;
 
 	    public void AddSteam(int unitsOfSteam)
         {
@@ -184,6 +184,7 @@ namespace SteamNSteel.Impl
             if (CanConnect(direction))
 
             _adjacentTransports[(int)direction] = transport;
+	        StructureChanged = true;
         }
 
         public ISteamTransport GetAdjacentTransport(ForgeDirection direction)
