@@ -9,13 +9,13 @@ namespace SteamNSteel.Impl
     // ReSharper disable SuggestVarOrType_BuiltInTypes  
     public class SteamTransportRegistry : ISteamTransportRegistry
     {
-        private readonly ConcurrentDictionary<SteamTransportLocation, SteamTransport> SteamUnits =
+        private readonly ConcurrentDictionary<SteamTransportLocation, SteamTransport> _steamTransports =
             new ConcurrentDictionary<SteamTransportLocation, SteamTransport>();
 
         public ISteamTransport RegisterSteamTransport(int x, int y, ForgeDirection[] initialAllowedDirections)
         {
 			SteamTransportLocation steamTransportLocation = SteamTransportLocation.Create(x, y);
-            SteamTransport result = SteamUnits.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
+            SteamTransport result = _steamTransports.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
 
 			bool[] allowedDirections = new bool[6];
 
@@ -38,21 +38,17 @@ namespace SteamNSteel.Impl
         {
             SteamTransport transport;
             var steamTransportLocation = SteamTransportLocation.Create(x, y);
-            SteamUnits.TryRemove(steamTransportLocation, out transport);
 
-            foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
-            {
-                SteamTransport adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
-                if (adjacentTransport == null) continue;
-
-                adjacentTransport.SetAdjacentTransport(direction.getOpposite(), null);
-            }
+	        if (_steamTransports.TryRemove(steamTransportLocation, out transport))
+	        {
+		        TheMod.SteamTransportStateMachine.RemoveTransport(transport);
+	        }
         }
 
 		public ISteamTransport GetSteamTransportAtLocation(SteamTransportLocation steamTransportLocation)
 		{
 			SteamTransport value;
-			if (SteamUnits.TryGetValue(steamTransportLocation, out value))
+			if (_steamTransports.TryGetValue(steamTransportLocation, out value))
 			{
 				return value;
 			}

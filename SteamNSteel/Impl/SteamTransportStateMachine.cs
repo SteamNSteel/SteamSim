@@ -69,7 +69,11 @@ namespace SteamNSteel.Impl
 		internal void AddTransport(SteamTransport transport)
 		{
 			TheMod.JobManager.AddPreTickJob(new RegisterTransportJob(this, transport));
+		}
 
+		internal void RemoveTransport(SteamTransport transport)
+		{
+			TheMod.JobManager.AddPreTickJob(new UnregisterTransportJob(this, transport));
 		}
 
 		internal void AddTransportInternal(SteamTransport transport)
@@ -94,6 +98,20 @@ namespace SteamNSteel.Impl
 			}
 
 			IndividualTransportJobs.Add(steamTransportLocation, new ProcessTransportJob(transport, this, _steamNSteelConfiguration));
+		}
+
+		internal void RemoveTransportInternal(SteamTransport transport)
+		{
+			IndividualTransportJobs.Remove(transport.GetTransportLocation());
+			TransientData.Remove(transport);
+
+			foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
+			{
+				SteamTransport adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
+				if (adjacentTransport == null) continue;
+
+				adjacentTransport.SetAdjacentTransport(direction.getOpposite(), null);
+			}
 		}
 
 		internal SteamTransportTransientData GetJobDataForTransport(ISteamTransport processTransportJob)
