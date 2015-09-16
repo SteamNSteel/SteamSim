@@ -14,7 +14,7 @@ namespace SteamNSteel.Impl
 
         public ISteamTransport RegisterSteamTransport(int x, int y, ForgeDirection[] initialAllowedDirections)
         {
-            SteamTransportLocation steamTransportLocation = SteamTransportLocation.Create(x, y);
+			SteamTransportLocation steamTransportLocation = SteamTransportLocation.Create(x, y);
             SteamTransport result = SteamUnits.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
 	        bool[] allowedDirections = new bool[6];
             

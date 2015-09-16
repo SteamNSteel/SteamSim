@@ -25,13 +25,21 @@ namespace SteamNSteel
 
 		public static void OnTick()
 		{
+			//TODO: Replace this with the world tick
 			CurrentTick++;
+			//TODO: Register JobManager for world tick events and handle this there.
+			JobManager.DoPretickJobs();
 			SteamTransportStateMachine.OnTick();
         }
 
 		public static void PostTick()
 		{
 			SteamTransportStateMachine.PostTick();
+		}
+
+		public static void OnSteamNSteelShuttingDown()
+		{
+			JobManager.Stop();
 		}
 	}
 }

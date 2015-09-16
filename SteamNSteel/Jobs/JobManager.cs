@@ -10,6 +10,7 @@ namespace SteamNSteel.Jobs
         private readonly List<Thread> JobThreads = new List<Thread>();
         private bool running = true;
         private BlockingCollection<IJob> _backgroundJobs = new BlockingCollection<IJob>(); 
+		private ConcurrentQueue<IJob> _pretickJobs = new ConcurrentQueue<IJob>();
 
         public JobManager()
         {
@@ -19,6 +20,23 @@ namespace SteamNSteel.Jobs
 	    public void AddBackgroundJob(IJob job)
 	    {
 		    _backgroundJobs.Add(job);
+	    }
+
+	    public void AddPreTickJob(IJob job)
+	    {
+		    _pretickJobs.Enqueue(job);
+	    }
+
+	    public void DoPretickJobs()
+	    {
+		    while (!_pretickJobs.IsEmpty)
+		    {
+			    IJob job;
+			    if (_pretickJobs.TryDequeue(out job))
+			    {
+				    job.Execute();
+			    }
+		    }
 	    }
 
         public void Start()

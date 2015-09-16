@@ -270,7 +270,6 @@ namespace SteamNSteel.Impl.Jobs
 
 		private void TransferWaterBelow(decimal usableWater)
 		{
-			//var unitAbove = _transport.GetAdjacentTransport(ForgeDirection.DOWN);
 			var neighbourWaterStored = _transportBelow.transport.GetWaterStored();
 			var neighbourMaximumWater = _transportBelow.transport.GetMaximumWater();
 

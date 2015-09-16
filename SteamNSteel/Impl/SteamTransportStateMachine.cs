@@ -39,10 +39,10 @@ namespace SteamNSteel.Impl
 				expectingJobs = false;
 				return;
 			}
-			
+
+			expectedJobs = jobs.Count;
 			foreach (var job in jobs)
 			{
-				Interlocked.Increment(ref expectedJobs);
 				TheMod.JobManager.AddBackgroundJob(job);
 			}
 
@@ -53,20 +53,31 @@ namespace SteamNSteel.Impl
 		{
 			if (expectingJobs)
 			{
+				Console.WriteLine($"{TheMod.CurrentTick} Waiting PostTick");
 				barrier.SignalAndWait();
+				Console.WriteLine($"{TheMod.CurrentTick} Finished PostTick");
 			}
 		}
 
 		private void Finished()
 		{
+			Console.WriteLine($"{TheMod.CurrentTick} Waiting PostJobs");
 			barrier.SignalAndWait();
+			Console.WriteLine($"{TheMod.CurrentTick} Released PostJobs");
 		}
 
 		internal void AddTransport(SteamTransport transport)
 		{
-			
-			IndividualTransportJobs.Add(transport.GetTransportLocation(), new ProcessTransportJob(transport, this, _steamNSteelConfiguration));
+			TheMod.JobManager.AddPreTickJob(new RegisterTransportJob(this, transport));
+
+		}
+
+		internal void AddTransportInternal(SteamTransport transport)
+		{
+
 			TransientData.Add(transport, new SteamTransportTransientData(transport));
+			IndividualTransportJobs.Add(transport.GetTransportLocation(), new ProcessTransportJob(transport, this, _steamNSteelConfiguration));
+			
 		}
 
 		internal SteamTransportTransientData GetJobDataForTransport(ISteamTransport processTransportJob)
