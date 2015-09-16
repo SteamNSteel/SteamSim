@@ -94,10 +94,10 @@ namespace SteamNSteel.Impl.Jobs
 			if (usableSteam <= 0) return;
 
 			var newCondensation = usableSteam * _config.CondensationRatePerTick * ((100 - _transport.GetTemperature()) / 100);
-			newCondensation = _transport.TakeSteam((int)newCondensation);
+			newCondensation = _transport.TakeSteam(newCondensation);
 			var waterGained = newCondensation * _config.SteamToWaterRatio;
-			_transport.AddCondensate((int)waterGained);
-			_transportData.newCondensation += (int) waterGained;
+			_transport.AddCondensate(waterGained);
+			_transportData.newCondensation += waterGained;
 		}
 
 		private void CalculateUnitHeat()
@@ -183,16 +183,17 @@ namespace SteamNSteel.Impl.Jobs
 
 				amountTransferred = amountTransferred * _config.TransferRatio;
 
-				amountTransferred = _transport.TakeSteam((int)amountTransferred);
-				_transportData.newSteam += (int)amountTransferred;
+				amountTransferred = _transport.TakeSteam(amountTransferred);
+				
 
 				neighbourTransport.VerifyTick();
-				neighbourTransport.transport.AddSteam((int)amountTransferred);
+				neighbourTransport.transport.AddSteam(amountTransferred);
+				neighbourTransport.newSteam += amountTransferred;
 				neighbourTransport.SteamFlowSourceUnits.Add(_transportData);
 			}
 		}
 
-		private void TransferSteamAbove(decimal usableSteam)
+		private void TransferSteamAbove(double usableSteam)
 		{
 			var neighbourSteamStored = _transportAbove.transport.GetSteamStored();
 			var neighbourMaximumSteam = _transportAbove.transport.GetCalculatedMaximumSteam();
@@ -205,11 +206,11 @@ namespace SteamNSteel.Impl.Jobs
 					amountTransferred = neighbourMaximumSteam - neighbourSteamStored;
 				}
 
-				amountTransferred = _transport.TakeSteam((int)amountTransferred);
-				_transportData.newSteam += (int)amountTransferred;
+				amountTransferred = _transport.TakeSteam(amountTransferred);
+				_transportData.newSteam += amountTransferred;
 
 				_transportAbove.VerifyTick();
-				_transportAbove.transport.AddSteam((int)amountTransferred);
+				_transportAbove.transport.AddSteam(amountTransferred);
 				_transportAbove.SteamFlowSourceUnits.Add(_transportData);
 				
 			}
@@ -232,10 +233,10 @@ namespace SteamNSteel.Impl.Jobs
 			}
 		}
 
-		private void TransferWaterAcross(decimal waterUsedAtStart)
+		private void TransferWaterAcross(double waterUsedAtStart)
 		{
 			_eligibleTransportData.Clear();
-			decimal waterSpaceAvailable = 0;
+			double waterSpaceAvailable = 0;
 			
 			foreach (var neighbourUnit in _horizontalAdjacentTransports)
 			{
@@ -268,16 +269,17 @@ namespace SteamNSteel.Impl.Jobs
 					amountTransferred = neighbourMaximumWater - neighbourWaterStored;
 				}
 
-				amountTransferred = _transport.TakeCondensate((int)amountTransferred);
-				_transportData.newCondensation += (int)amountTransferred;
+				amountTransferred = _transport.TakeCondensate(amountTransferred);
+				
 
 				neighbourUnit.VerifyTick();
-				neighbourUnit.transport.AddCondensate((int)amountTransferred);
+				neighbourUnit.transport.AddCondensate(amountTransferred);
+				neighbourUnit.newCondensation += amountTransferred;
 				neighbourUnit.WaterFlowSourceUnits.Add(_transportData);
 			}
 		}
 
-		private void TransferWaterBelow(decimal usableWater)
+		private void TransferWaterBelow(double usableWater)
 		{
 			var neighbourWaterStored = _transportBelow.transport.GetWaterStored();
 			var neighbourMaximumWater = _transportBelow.transport.GetMaximumWater();
@@ -296,11 +298,11 @@ namespace SteamNSteel.Impl.Jobs
 					amountTransferred = usableWater;
 				}
 
-				amountTransferred = _transport.TakeCondensate((int) amountTransferred);
+				amountTransferred = _transport.TakeCondensate( amountTransferred);
 
 				_transportBelow.VerifyTick();
-				_transportBelow.transport.AddCondensate((int)amountTransferred);
-				_transportBelow.newCondensation += (int)amountTransferred;
+				_transportBelow.transport.AddCondensate(amountTransferred);
+				_transportBelow.newCondensation += amountTransferred;
 				_transportBelow.WaterFlowSourceUnits.Add(_transportData);
 			}
 		}
