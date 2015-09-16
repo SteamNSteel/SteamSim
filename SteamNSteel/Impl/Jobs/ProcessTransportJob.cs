@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Steam.API;
 using SteamNSteel.Jobs;
@@ -7,7 +8,7 @@ namespace SteamNSteel.Impl.Jobs
 {
 	public class ProcessTransportJob : IJob
 	{
-		private readonly SteamTransport _transport;
+		internal readonly SteamTransport _transport;
 		private readonly INotifyTransportJobComplete _notificationRecipient;
 		private readonly List<SteamTransportTransientData> _eligibleTransportData = new List<SteamTransportTransientData>();
 		private readonly SteamNSteelConfiguration _config;
@@ -25,19 +26,27 @@ namespace SteamNSteel.Impl.Jobs
 
 		public void Execute()
 		{
-			if (_transportData == null || _transport.StructureChanged)
+			try
 			{
-				UpdateLocalData();
+				if (_transportData == null || _transport.StructureChanged)
+				{
+					UpdateLocalData();
 
-				_transport.StructureChanged = false;
+					_transport.StructureChanged = false;
+				}
+
+				_transportData.VerifyTick();
+
+				TransferSteam();
+				CalculateUnitHeat();
+				TransferWater();
+				CondenseSteam();
+
 			}
-
-			_transportData.VerifyTick();
-
-			TransferSteam();
-			CalculateUnitHeat();
-			TransferWater();
-			CondenseSteam();
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+			}
 
 			_notificationRecipient.JobComplete();
 		}

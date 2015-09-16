@@ -16,33 +16,21 @@ namespace SteamNSteel.Impl
         {
 			SteamTransportLocation steamTransportLocation = SteamTransportLocation.Create(x, y);
             SteamTransport result = SteamUnits.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
-	        bool[] allowedDirections = new bool[6];
-            
-            foreach (ForgeDirection initialAllowedDirection in initialAllowedDirections)
-            {
-                allowedDirections[(int) initialAllowedDirection] = true;
-            }
 
-            //Should this be a job?
-            foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
-            {
-                bool canConnect = allowedDirections[(int) direction];
-                result.SetCanConnect(direction, canConnect);
+			bool[] allowedDirections = new bool[6];
 
-                if (!canConnect) continue;
+			foreach (ForgeDirection initialAllowedDirection in initialAllowedDirections)
+			{
+				allowedDirections[(int)initialAllowedDirection] = true;
+			}
 
-	            SteamTransportLocation altSteamTransportLocation = steamTransportLocation.Offset(direction);
+	        foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
+	        {
+		        bool canConnect = allowedDirections[(int) direction];
+		        result.SetCanConnect(direction, canConnect);
+	        }
 
-                SteamTransport foundTransport;
-                if (!SteamUnits.TryGetValue(altSteamTransportLocation, out foundTransport)) continue;
-
-                ForgeDirection oppositeDirection = direction.getOpposite();
-                if (!foundTransport.CanConnect(oppositeDirection)) continue;
-				
-                result.SetAdjacentTransport(direction, foundTransport);
-                foundTransport.SetAdjacentTransport(oppositeDirection, result);
-            }
-			TheMod.SteamTransportStateMachine.AddTransport(result);
+	        TheMod.SteamTransportStateMachine.AddTransport(result);
 			return result;
         }
 

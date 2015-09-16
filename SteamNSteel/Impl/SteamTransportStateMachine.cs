@@ -74,10 +74,26 @@ namespace SteamNSteel.Impl
 
 		internal void AddTransportInternal(SteamTransport transport)
 		{
-
+			var steamTransportLocation = transport.GetTransportLocation();
+			Console.WriteLine($"{TheMod.CurrentTick} Adding Transport {steamTransportLocation}");
 			TransientData.Add(transport, new SteamTransportTransientData(transport));
-			IndividualTransportJobs.Add(transport.GetTransportLocation(), new ProcessTransportJob(transport, this, _steamNSteelConfiguration));
-			
+
+			foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
+			{
+				if (!transport.CanConnect(direction)) continue;
+				SteamTransportLocation altSteamTransportLocation = steamTransportLocation.Offset(direction);
+				
+				ProcessTransportJob foundTransportJob;
+                if (!IndividualTransportJobs.TryGetValue(altSteamTransportLocation, out foundTransportJob)) continue;
+				SteamTransport foundTransport = foundTransportJob._transport;
+				ForgeDirection oppositeDirection = direction.getOpposite();
+				if (!foundTransport.CanConnect(oppositeDirection)) continue;
+
+				transport.SetAdjacentTransport(direction, foundTransport);
+				foundTransport.SetAdjacentTransport(oppositeDirection, transport);
+			}
+
+			IndividualTransportJobs.Add(steamTransportLocation, new ProcessTransportJob(transport, this, _steamNSteelConfiguration));
 		}
 
 		internal SteamTransportTransientData GetJobDataForTransport(ISteamTransport processTransportJob)
