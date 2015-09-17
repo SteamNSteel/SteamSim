@@ -45,11 +45,11 @@ namespace SteamPipes.UI
 				//}
 
 				var solidColorBrush = Brushes.SandyBrown;
-				if (SteamUnit is ISteamProvider)
+				if (SteamUnit is BoilerTileEntity)
 				{
 					solidColorBrush = Brushes.Green;
 				}
-				else if (steamTransport is ISteamConsumer)
+				else if (SteamUnit is FurnaceTileEntity || SteamUnit is BallMillTileEntity)
 				{
 					solidColorBrush = Brushes.Tomato;
 				}
