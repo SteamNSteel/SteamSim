@@ -2,28 +2,28 @@
 {
     public interface ISteamTransport
     {
-        void AddSteam(int unitsOfSteam);
+        void AddSteam(double unitsOfSteam);
 
-        void AddCondensate(int unitsOfWater);
+        void AddCondensate(double unitsOfWater);
 
-        int TakeSteam(int desiredUnitsOfSteam);
+		double TakeSteam(double desiredUnitsOfSteam);
 
-        int TakeCondensate(int desiredUnitsOfWater);
+		double TakeCondensate(double desiredUnitsOfWater);
 
-        void SetMaximumSteam(int maximumUnitsOfSteam);
+        void SetMaximumSteam(double maximumUnitsOfSteam);
 
-        void SetMaximumCondensate(int maximimUnitsOfWater);
+        void SetMaximumCondensate(double maximimUnitsOfWater);
 
         void ToggleDebug();
 
         bool GetShouldDebug();
-        int GetSteamStored();
-        int GetWaterStored();
-        int GetMaximumWater();
+		double GetSteamStored();
+		double GetWaterStored();
+		double GetMaximumWater();
 
-        int GetMaximumSteam();
+		double GetMaximumSteam();
         double GetCalculatedSteamDensity();
-        int GetCalculatedMaximumSteam();
+		double GetCalculatedMaximumSteam();
         double GetTemperature();
         
 

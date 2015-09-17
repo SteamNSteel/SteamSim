@@ -15,14 +15,14 @@ namespace SteamNSteel.Impl
             _maximumWater = 800;
         }
 
-        private int _waterStored = 0;
-        private int _steamStored = 0;
+        private double _waterStored = 0;
+        private double _steamStored = 0;
 
         private double _temperature;
 	    private double _heatConductivity;
 
-        private int _maximumWater;
-        private int _maximumSteam;
+        private double _maximumWater;
+        private double _maximumSteam;
 
         readonly ISteamTransport[] _adjacentTransports = new ISteamTransport[6];
         readonly bool[] _canConnect = new bool[6];
@@ -31,7 +31,7 @@ namespace SteamNSteel.Impl
 	    public readonly object _syncObj = new object();
 	    public bool StructureChanged;
 
-	    public void AddSteam(int unitsOfSteam)
+	    public void AddSteam(double unitsOfSteam)
         {
             if (_steamStored + unitsOfSteam >= _maximumSteam)
             {   
@@ -45,7 +45,7 @@ namespace SteamNSteel.Impl
             //return 0;
         }
 
-        public void AddCondensate(int unitsOfWater)
+        public void AddCondensate(double unitsOfWater)
         {
             if (_waterStored + unitsOfWater >= _maximumWater)
             {
@@ -59,7 +59,7 @@ namespace SteamNSteel.Impl
             //return 0;
         }
 
-        public int TakeSteam(int desiredUnitsOfSteam)
+        public double TakeSteam(double desiredUnitsOfSteam)
         {
             if (desiredUnitsOfSteam <= _steamStored)
             {
@@ -67,12 +67,12 @@ namespace SteamNSteel.Impl
                 return desiredUnitsOfSteam;
             }
 
-            int actualUnitsOfSteam = _steamStored;
+			double actualUnitsOfSteam = _steamStored;
             _steamStored = 0;
             return actualUnitsOfSteam;
         }
 
-        public int TakeCondensate(int desiredUnitsOfWater)
+        public double TakeCondensate(double desiredUnitsOfWater)
         {
             if (desiredUnitsOfWater > _waterStored)
             {
@@ -80,17 +80,17 @@ namespace SteamNSteel.Impl
                 return desiredUnitsOfWater;
             }
 
-            int actualUnitsOfSteam = _waterStored;
+			double actualUnitsOfSteam = _waterStored;
             _waterStored = 0;
             return actualUnitsOfSteam;
         }
 
-        public void SetMaximumSteam(int maximumUnitsOfSteam)
+        public void SetMaximumSteam(double maximumUnitsOfSteam)
         {
             _maximumSteam = maximumUnitsOfSteam;
         }
 
-        public void SetMaximumCondensate(int maximimUnitsOfWater)
+        public void SetMaximumCondensate(double maximimUnitsOfWater)
         {
             _maximumWater = maximimUnitsOfWater;
         }
@@ -105,22 +105,22 @@ namespace SteamNSteel.Impl
             return _debug;
         }
 
-        public int GetSteamStored()
+        public double GetSteamStored()
         {
             return _steamStored;
         }
 
-        public int GetWaterStored()
+        public double GetWaterStored()
         {
             return _waterStored;
         }
 
-        public int GetMaximumWater()
+        public double GetMaximumWater()
         {
             return _maximumWater;
         }
 
-        public int GetMaximumSteam()
+        public double GetMaximumSteam()
         {
             return _maximumSteam;
         }
@@ -164,7 +164,7 @@ namespace SteamNSteel.Impl
             return y;
         }
 
-        public int GetCalculatedMaximumSteam()
+        public double GetCalculatedMaximumSteam()
         {
             return (1 - (_waterStored / _maximumWater)) * _maximumSteam;
         }

@@ -69,15 +69,49 @@ namespace SteamNSteel.Impl
 		internal void AddTransport(SteamTransport transport)
 		{
 			TheMod.JobManager.AddPreTickJob(new RegisterTransportJob(this, transport));
+		}
 
+		internal void RemoveTransport(SteamTransport transport)
+		{
+			TheMod.JobManager.AddPreTickJob(new UnregisterTransportJob(this, transport));
 		}
 
 		internal void AddTransportInternal(SteamTransport transport)
 		{
-
+			var steamTransportLocation = transport.GetTransportLocation();
+			Console.WriteLine($"{TheMod.CurrentTick} Adding Transport {steamTransportLocation}");
 			TransientData.Add(transport, new SteamTransportTransientData(transport));
-			IndividualTransportJobs.Add(transport.GetTransportLocation(), new ProcessTransportJob(transport, this, _steamNSteelConfiguration));
-			
+
+			foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
+			{
+				if (!transport.CanConnect(direction)) continue;
+				SteamTransportLocation altSteamTransportLocation = steamTransportLocation.Offset(direction);
+				
+				ProcessTransportJob foundTransportJob;
+                if (!IndividualTransportJobs.TryGetValue(altSteamTransportLocation, out foundTransportJob)) continue;
+				SteamTransport foundTransport = foundTransportJob._transport;
+				ForgeDirection oppositeDirection = direction.getOpposite();
+				if (!foundTransport.CanConnect(oppositeDirection)) continue;
+
+				transport.SetAdjacentTransport(direction, foundTransport);
+				foundTransport.SetAdjacentTransport(oppositeDirection, transport);
+			}
+
+			IndividualTransportJobs.Add(steamTransportLocation, new ProcessTransportJob(transport, this, _steamNSteelConfiguration));
+		}
+
+		internal void RemoveTransportInternal(SteamTransport transport)
+		{
+			IndividualTransportJobs.Remove(transport.GetTransportLocation());
+			TransientData.Remove(transport);
+
+			foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
+			{
+				SteamTransport adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
+				if (adjacentTransport == null) continue;
+
+				adjacentTransport.SetAdjacentTransport(direction.getOpposite(), null);
+			}
 		}
 
 		internal SteamTransportTransientData GetJobDataForTransport(ISteamTransport processTransportJob)

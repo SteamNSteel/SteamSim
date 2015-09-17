@@ -32,8 +32,8 @@ namespace SteamNSteel.Impl
 		}
 
 		public readonly ISteamTransport transport;
-		public int newSteam;
-		public int newCondensation;
+		public double newSteam;
+		public double newCondensation;
 		public List<SteamTransportTransientData> WaterFlowSourceUnits { get; set; }
 		public List<SteamTransportTransientData> SteamFlowSourceUnits { get; set; }
 	}
