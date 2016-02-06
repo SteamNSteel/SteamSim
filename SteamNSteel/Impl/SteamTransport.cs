@@ -61,6 +61,11 @@ namespace SteamNSteel.Impl
 
         public double TakeSteam(double desiredUnitsOfSteam)
         {
+	        if (_steamStored <= 0)
+	        {
+		        _steamStored = 0;
+		        return 0;
+	        }
             if (desiredUnitsOfSteam <= _steamStored)
             {
                 _steamStored -= desiredUnitsOfSteam;
@@ -74,9 +79,15 @@ namespace SteamNSteel.Impl
 
         public double TakeCondensate(double desiredUnitsOfWater)
         {
-            if (desiredUnitsOfWater > _waterStored)
+	        if (_waterStored <= 0)
+	        {
+		        _waterStored = 0;
+		        return 0;
+	        }
+
+            if (desiredUnitsOfWater <= _waterStored)
             {
-                _steamStored -= desiredUnitsOfWater;
+                _waterStored -= desiredUnitsOfWater;
                 return desiredUnitsOfWater;
             }
 

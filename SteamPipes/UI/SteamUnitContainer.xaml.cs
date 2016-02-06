@@ -128,24 +128,24 @@ namespace SteamPipes.UI
 
 				double y = 0;
 				var text =
-					new FormattedText("steam: " + steamTransport.GetSteamStored() + "/" + steamTransport.GetCalculatedMaximumSteam(),
+					new FormattedText($"steam: {steamTransport.GetSteamStored():0}/{steamTransport.GetCalculatedMaximumSteam():0}",
 						CultureInfo.CurrentUICulture,
 						FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText("density: " + Math.Floor(steamTransport.GetCalculatedSteamDensity()) + '%', CultureInfo.CurrentUICulture,
+				text = new FormattedText($"density: {Math.Floor(steamTransport.GetCalculatedSteamDensity())}%", CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText("water: " + steamTransport.GetWaterStored() + "/" + steamTransport.GetMaximumWater(),
+				text = new FormattedText($"water: {steamTransport.GetWaterStored():0}/{steamTransport.GetMaximumWater():0}",
 					CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText("temp: " + Math.Floor(steamTransport.GetTemperature()) + '%', CultureInfo.CurrentUICulture,
+				text = new FormattedText($"temp: {Math.Floor(steamTransport.GetTemperature())}%", CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 			}
