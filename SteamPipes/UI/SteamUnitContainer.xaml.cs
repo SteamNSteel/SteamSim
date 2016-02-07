@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Steam.Machines;
 using SteamNSteel.API;
+using SteamNSteel.Impl;
 
 namespace SteamPipes.UI
 {
@@ -56,7 +57,16 @@ namespace SteamPipes.UI
 
 				var waterUsage = (steamTransport.GetWaterStored()/(double)steamTransport.GetMaximumWater());
 				var waterHeightPixels = RenderSize.Height*waterUsage;
-				var steamRenderHeight = Math.Max(0, (RenderSize.Height - waterHeightPixels)*steamTransport.GetCalculatedSteamDensity()/100);
+				var actualMaximumSteam = SteamMaths.CalculateMaximumSteam(
+						steamTransport.GetWaterStored(),
+						steamTransport.GetMaximumWater(),
+						steamTransport.GetMaximumSteam()
+					);
+
+				var steamDensity = SteamMaths.CalculateSteamDensity(
+					steamTransport.GetSteamStored(),
+					actualMaximumSteam);
+				var steamRenderHeight = Math.Max(0, (RenderSize.Height - waterHeightPixels)* steamDensity / 100);
 				
 				drawingContext.DrawRectangle(Brushes.LightGray, null,
 					new Rect(new Size(RenderSize.Width, steamRenderHeight)));
@@ -128,13 +138,13 @@ namespace SteamPipes.UI
 
 				double y = 0;
 				var text =
-					new FormattedText($"steam: {steamTransport.GetSteamStored():0}/{steamTransport.GetCalculatedMaximumSteam():0}",
+					new FormattedText($"steam: {steamTransport.GetSteamStored():0}/{actualMaximumSteam:0}",
 						CultureInfo.CurrentUICulture,
 						FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText($"density: {Math.Floor(steamTransport.GetCalculatedSteamDensity())}%", CultureInfo.CurrentUICulture,
+				text = new FormattedText($"density: {Math.Floor(steamDensity)}%", CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 

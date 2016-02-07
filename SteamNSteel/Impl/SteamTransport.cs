@@ -151,34 +151,9 @@ namespace SteamNSteel.Impl
 			return _heatConductivity;
 		}
 
-		public double GetCalculatedSteamDensity()
-        {
-            var calculatedMaximumSteam = GetCalculatedMaximumSteam();
-            if (calculatedMaximumSteam <= 0)
-            {
-                return _steamStored > 0 ? 100 : 0;
-            }
+		
 
-            var x = (double)_steamStored;
-            var c = (double)calculatedMaximumSteam;
-            var a = c / 100;
-            var b = 100 / c;
-            var y = Math.Log10((x + a) * b) * 50;
-            if (y > 100)
-            {
-                return 100;
-            }
-            if (y < 0)
-            {
-                return 0;
-            }
-            return y;
-        }
 
-        public double GetCalculatedMaximumSteam()
-        {
-            return (1 - (_waterStored / _maximumWater)) * _maximumSteam;
-        }
 
         public void SetCanConnect(ForgeDirection direction, bool canConnect)
         {

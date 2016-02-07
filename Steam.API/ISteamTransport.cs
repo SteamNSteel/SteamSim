@@ -22,8 +22,8 @@
 		double GetMaximumWater();
 
 		double GetMaximumSteam();
-        double GetCalculatedSteamDensity();
-		double GetCalculatedMaximumSteam();
+        
+		//double GetCalculatedMaximumSteam();
         double GetTemperature();
         
 
