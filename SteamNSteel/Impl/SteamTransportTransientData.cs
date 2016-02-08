@@ -29,6 +29,7 @@
 					PreviousState.SteamDensity = SteamMaths.CalculateSteamDensity(PreviousState.SteamStored, PreviousState.ActualMaximumSteam);
 					CondensationAdded = 0;
 					SteamAdded = 0;
+					tickLastUpdated = TheMod.CurrentTick;
 				}
 			}
 		}
@@ -124,5 +125,10 @@
 		public double UsableSteam => PreviousState.SteamStored - SteamAdded;
 		public double UsableWater => PreviousState.CondensationStored - CondensationAdded;
 		public bool Debug => transport.GetShouldDebug();
+
+		public int TickLastUpdated
+		{
+			get { return tickLastUpdated; }
+		}
 	}
 }

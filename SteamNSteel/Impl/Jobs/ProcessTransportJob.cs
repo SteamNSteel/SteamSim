@@ -197,14 +197,22 @@ namespace SteamNSteel.Impl.Jobs
 		{
 			_eligibleTransportData.Clear();
 
-			SteamTransportTransientData nextTransport = null;
+			/*SteamTransportTransientData nextTransport = null;
 			foreach (var steamTransportTransientData in _horizontalAdjacentTransports)
 			{
 				if (nextTransport == null || nextTransport.PreviousState.SteamStored <= steamTransportTransientData.PreviousState.SteamStored)
 				{
 					nextTransport = steamTransportTransientData;
 				}
+			}*/
+
+			if (_horizontalAdjacentTransports.Length == 0)
+			{
+				return;
 			}
+
+			var elementIndex = _transportData.TickLastUpdated%_horizontalAdjacentTransports.Length;
+			SteamTransportTransientData nextTransport = _horizontalAdjacentTransports.ElementAt(elementIndex);
 
 			var neighbourWaterStored = nextTransport.PreviousState.CondensationStored;
 			var neighbourMaximumWater = nextTransport.PreviousState.MaximumCondensation;
