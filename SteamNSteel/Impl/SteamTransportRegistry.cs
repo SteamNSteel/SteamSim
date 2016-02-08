@@ -12,19 +12,19 @@ namespace SteamNSteel.Impl
         private readonly ConcurrentDictionary<SteamTransportLocation, SteamTransport> _steamTransports =
             new ConcurrentDictionary<SteamTransportLocation, SteamTransport>();
 
-        public ISteamTransport RegisterSteamTransport(int x, int y, ForgeDirection[] initialAllowedDirections)
+        public ISteamTransport RegisterSteamTransport(int x, int y, EnumFacing[] initialAllowedDirections)
         {
 			SteamTransportLocation steamTransportLocation = SteamTransportLocation.Create(x, y);
             SteamTransport result = _steamTransports.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
 
 			bool[] allowedDirections = new bool[6];
 
-			foreach (ForgeDirection initialAllowedDirection in initialAllowedDirections)
+			foreach (EnumFacing initialAllowedDirection in initialAllowedDirections)
 			{
 				allowedDirections[(int)initialAllowedDirection] = true;
 			}
 
-	        foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
+	        foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
 	        {
 		        bool canConnect = allowedDirections[(int) direction];
 		        result.SetCanConnect(direction, canConnect);

@@ -56,35 +56,35 @@ namespace SteamNSteel.Impl.Jobs
 			var stateMachine = TheMod.SteamTransportStateMachine;
 			List<SteamTransportTransientData> adjacentTransports = new List<SteamTransportTransientData>();
 
-			var adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.NORTH);
+			var adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(EnumFacing.NORTH);
 			if (adjacentTransport != null)
 			{
 				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
 			}
-			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.EAST);
+			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(EnumFacing.EAST);
 			if (adjacentTransport != null)
 			{
 				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
 			}
-			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.SOUTH);
+			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(EnumFacing.SOUTH);
 			if (adjacentTransport != null)
 			{
 				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
 			}
-			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(ForgeDirection.WEST);
+			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(EnumFacing.WEST);
 			if (adjacentTransport != null)
 			{
 				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
 			}
 			_horizontalAdjacentTransports = adjacentTransports.ToArray();
 
-			adjacentTransport = (SteamTransport)_transport.GetAdjacentTransport(ForgeDirection.UP);
+			adjacentTransport = (SteamTransport)_transport.GetAdjacentTransport(EnumFacing.UP);
 			_transportAbove = adjacentTransport == null ? null : stateMachine.GetJobDataForTransport(adjacentTransport);
 			if (_transportAbove != null)
 			{
 				adjacentTransports.Add(_transportAbove);
 			}
-			adjacentTransport = (SteamTransport)_transport.GetAdjacentTransport(ForgeDirection.DOWN);
+			adjacentTransport = (SteamTransport)_transport.GetAdjacentTransport(EnumFacing.DOWN);
 			_transportBelow = adjacentTransport == null ? null : stateMachine.GetJobDataForTransport(adjacentTransport);
 			if (_transportBelow != null)
 			{
@@ -180,7 +180,10 @@ namespace SteamNSteel.Impl.Jobs
 		{
 			var usableWater = _transportData.PreviousState.CondensationStored;
 
-			if (usableWater <= 0) return;
+			if (usableWater <= 0)
+			{
+				TransferWaterFromHigherPoint();
+			}
 			//First, work on any units above
 			if (_transportBelow != null)
 			{
@@ -191,20 +194,78 @@ namespace SteamNSteel.Impl.Jobs
 			{
 				TransferWaterAcross(usableWater);
 			}
+
+			TransferWaterFromHigherPoint();
+		}
+
+		private void TransferWaterFromHigherPoint()
+		{
+			if (_transportData.Debug)
+			{
+				Console.WriteLine("HERE!");
+			}
+
+			if (_transportBelow == null || !(_transportData.UsableSteam < _transportData.PreviousState.ActualMaximumSteam))
+			{
+				return;
+			}
+			var previousTransportState = _transportBelow.PreviousState;
+			if (!(Math.Abs(previousTransportState.CondensationStored - previousTransportState.MaximumCondensation) < 100))
+			{
+				return;
+			}
+
+			Stack<SearchData> elementsToSearch = new Stack<SearchData>();
+			elementsToSearch.Push(new SearchData(_transportBelow.Transport, 0));
+			SearchData candidate = null;
+			while (elementsToSearch.Any())
+			{
+				var searchData = elementsToSearch.Pop();
+				var transport = searchData.Transport;
+				var depth = searchData.Depth;
+				var transportPreviousData = searchData.PreviousTransportState;
+
+				if (depth < 0 && (candidate == null || depth < candidate.Depth))
+				{
+					candidate = searchData;
+				}
+
+				foreach (var direction in EnumFacing.VALID_DIRECTIONS)
+				{
+					if (transport.CanConnect(direction))
+					{
+						if (!(Math.Abs(transportPreviousData.CondensationStored - transportPreviousData.MaximumCondensation) >= 100))
+						{
+							var newDepth = depth + direction.offsetZ;
+							elementsToSearch.Push(new SearchData(transport.GetAdjacentTransport(EnumFacing.UP), newDepth));
+						}
+					}
+				}
+			}
+
+			if (_transportData.Debug)
+			{
+				Console.WriteLine("bleah");
+			}
+		}
+
+		private class SearchData
+		{
+			internal readonly SteamTransport Transport;
+			internal readonly int Depth;
+			internal readonly SteamTransportTransientData.PreviousTransportState PreviousTransportState;
+
+			public SearchData(ISteamTransport transport, int depth)
+			{
+				Transport = (SteamTransport)transport;
+				PreviousTransportState = TheMod.SteamTransportStateMachine.GetJobDataForTransport(Transport).PreviousState;
+				Depth = depth;
+			}
 		}
 
 		private void TransferWaterAcross(double waterUsedAtStart)
 		{
 			_eligibleTransportData.Clear();
-
-			/*SteamTransportTransientData nextTransport = null;
-			foreach (var steamTransportTransientData in _horizontalAdjacentTransports)
-			{
-				if (nextTransport == null || nextTransport.PreviousState.SteamStored <= steamTransportTransientData.PreviousState.SteamStored)
-				{
-					nextTransport = steamTransportTransientData;
-				}
-			}*/
 
 			if (_horizontalAdjacentTransports.Length == 0)
 			{
@@ -213,6 +274,12 @@ namespace SteamNSteel.Impl.Jobs
 
 			var elementIndex = _transportData.TickLastUpdated%_horizontalAdjacentTransports.Length;
 			SteamTransportTransientData nextTransport = _horizontalAdjacentTransports.ElementAt(elementIndex);
+
+			if (nextTransport == null)
+			{
+				return;
+			}
+			nextTransport.VerifyTick();
 
 			var neighbourWaterStored = nextTransport.PreviousState.CondensationStored;
 			var neighbourMaximumWater = nextTransport.PreviousState.MaximumCondensation;
@@ -227,7 +294,7 @@ namespace SteamNSteel.Impl.Jobs
 				return;
 			}
 
-			var desiredTransfer = (waterStored - neighbourWaterStored)/_horizontalAdjacentTransports.Length;
+			var desiredTransfer = (waterStored - neighbourWaterStored)/(_horizontalAdjacentTransports.Length + 1);
 			foreach (var steamTransportTransientData in _horizontalAdjacentTransports)
 			{
 				var takeCondensate = _transportData.TakeCondensate(desiredTransfer);

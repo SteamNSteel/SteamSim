@@ -15,16 +15,16 @@ namespace Steam.Machines
             ChildMod.AddTileEntity(this);
         }
 
-        protected virtual ForgeDirection[] GetValidSteamTransportDirections()
+        protected virtual EnumFacing[] GetValidSteamTransportDirections()
         {
             return new []
             {
-                ForgeDirection.DOWN, 
-                ForgeDirection.UP,
-                ForgeDirection.NORTH,
-                ForgeDirection.SOUTH,
-                ForgeDirection.WEST,
-                ForgeDirection.EAST
+                EnumFacing.DOWN, 
+                EnumFacing.UP,
+                EnumFacing.NORTH,
+                EnumFacing.SOUTH,
+                EnumFacing.WEST,
+                EnumFacing.EAST
             };
         }
 

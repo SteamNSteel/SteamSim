@@ -130,5 +130,7 @@
 		{
 			get { return tickLastUpdated; }
 		}
+
+		public SteamTransport Transport => transport;
 	}
 }

@@ -155,17 +155,17 @@ namespace SteamNSteel.Impl
 
 
 
-        public void SetCanConnect(ForgeDirection direction, bool canConnect)
+        public void SetCanConnect(EnumFacing direction, bool canConnect)
         {
             _canConnect[(int)direction] = canConnect;
         }
 
-        public bool CanConnect(ForgeDirection direction)
+        public bool CanConnect(EnumFacing direction)
         {
             return _canConnect[(int) direction];
         }
 
-        public void SetAdjacentTransport(ForgeDirection direction, ISteamTransport transport)
+        public void SetAdjacentTransport(EnumFacing direction, ISteamTransport transport)
         {
             if (CanConnect(direction))
 
@@ -173,29 +173,31 @@ namespace SteamNSteel.Impl
 	        StructureChanged = true;
         }
 
-        public ISteamTransport GetAdjacentTransport(ForgeDirection direction)
+        public ISteamTransport GetAdjacentTransport(EnumFacing direction)
         {
             return _adjacentTransports[(int)direction];
         }
 
         public bool CanTransportAbove()
         {
-            return _adjacentTransports[(int) ForgeDirection.UP] != null;
+            return _adjacentTransports[(int) EnumFacing.UP] != null;
         }
 
         public bool CanTransportBelow()
         {
-            return _adjacentTransports[(int)ForgeDirection.DOWN] != null;
+            return _adjacentTransports[(int)EnumFacing.DOWN] != null;
         }
 
+		[Obsolete]
         public bool CanTransportWest()
         {
-            return _adjacentTransports[(int)ForgeDirection.WEST] != null;
+            return _adjacentTransports[(int)EnumFacing.WEST] != null;
         }
 
-        public bool CanTransportEast()
+		[Obsolete]
+		public bool CanTransportEast()
         {
-            return _adjacentTransports[(int)ForgeDirection.EAST] != null;
+            return _adjacentTransports[(int)EnumFacing.EAST] != null;
         }
 
         internal SteamTransportTopology GetTopology()

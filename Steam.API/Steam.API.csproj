@@ -41,7 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ForgeDirection.cs" />
+    <Compile Include="EnumFacing.cs" />
     <Compile Include="ISteamTransport.cs" />
     <Compile Include="ISteamTransportRegistry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -82,7 +82,7 @@ namespace SteamNSteel.Impl
 			Console.WriteLine($"{TheMod.CurrentTick} Adding Transport {steamTransportLocation}");
 			TransientData.Add(transport, new SteamTransportTransientData(transport));
 
-			foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
+			foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
 			{
 				if (!transport.CanConnect(direction)) continue;
 				SteamTransportLocation altSteamTransportLocation = steamTransportLocation.Offset(direction);
@@ -90,7 +90,7 @@ namespace SteamNSteel.Impl
 				ProcessTransportJob foundTransportJob;
                 if (!IndividualTransportJobs.TryGetValue(altSteamTransportLocation, out foundTransportJob)) continue;
 				SteamTransport foundTransport = foundTransportJob._transport;
-				ForgeDirection oppositeDirection = direction.getOpposite();
+				EnumFacing oppositeDirection = direction.getOpposite();
 				if (!foundTransport.CanConnect(oppositeDirection)) continue;
 
 				transport.SetAdjacentTransport(direction, foundTransport);
@@ -105,7 +105,7 @@ namespace SteamNSteel.Impl
 			IndividualTransportJobs.Remove(transport.GetTransportLocation());
 			TransientData.Remove(transport);
 
-			foreach (ForgeDirection direction in ForgeDirection.VALID_DIRECTIONS)
+			foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
 			{
 				SteamTransport adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
 				if (adjacentTransport == null) continue;

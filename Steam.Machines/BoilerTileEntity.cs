@@ -10,14 +10,14 @@ namespace Steam.Machines
             base.OnTick();
         }
 
-        protected override ForgeDirection[] GetValidSteamTransportDirections()
+        protected override EnumFacing[] GetValidSteamTransportDirections()
         {
             return new []
             {
-                ForgeDirection.NORTH,
-                ForgeDirection.SOUTH,
-                ForgeDirection.EAST,
-                ForgeDirection.WEST,
+                EnumFacing.NORTH,
+                EnumFacing.SOUTH,
+                EnumFacing.EAST,
+                EnumFacing.WEST,
             };
         }
     }
