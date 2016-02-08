@@ -66,6 +66,8 @@
                             Click="RemoveCondensationButton_Click" />
                 </WrapPanel>
             </GroupBox>
+            <Button x:Name="ResumeSimulationButton" Content="Start/Resume" Margin="0,16,0,0" Click="ResumeSimulationButton_Click" />
+            <Button x:Name="StopSimulationButton" Content="Stop" Margin="0,16,0,0" Click="StopSimulationButton_Click" />
             <Button x:Name="StepSimulationButton" Content="Step" Margin="0,16,0,0" Click="StepSimulationButton_Click" />
         </StackPanel>
     </Grid>

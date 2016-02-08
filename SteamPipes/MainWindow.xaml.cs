@@ -7,9 +7,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Navigation;
 using Steam.Machines;
 using SteamNSteel;
 using SteamNSteel.API;
+using SteamNSteel.Jobs;
 using SteamPipes.UI;
 
 namespace SteamPipes
@@ -46,19 +48,12 @@ namespace SteamPipes
             
             while (_tickThreadRunning)
             {
-				TheMod.OnTick();
+	            if (State == RunningState.Running)
+	            {
 
-				lock (ChildMod.TileEntities)
-                {
-                    foreach (var tileEntity in ChildMod.TileEntities)
-                    {
-                        tileEntity.OnTick();
-                    }
-                }
-
-				TheMod.PostTick();
-
-				var thisTick = DateTime.Now;
+		            DoTick();
+	            }
+	            var thisTick = DateTime.Now;
                 _previousTick = thisTick;
 
 	            var timeSpan = tps - (DateTime.Now - _previousTick);
@@ -67,7 +62,22 @@ namespace SteamPipes
             }
 	    }
 
-	    protected override void OnClosing(CancelEventArgs e)
+		private static void DoTick()
+		{
+			TheMod.OnTick();
+
+			lock (ChildMod.TileEntities)
+			{
+				foreach (var tileEntity in ChildMod.TileEntities)
+				{
+					tileEntity.OnTick();
+				}
+			}
+
+			TheMod.PostTick();
+		}
+
+		protected override void OnClosing(CancelEventArgs e)
 	    {
 	        _tickThreadRunning = false;
 	    }
@@ -133,6 +143,7 @@ namespace SteamPipes
 						objectIdentified.PlaceFurnace();
 						break;
 				}
+				InvalidateVisual();
 			}
 		}
 
@@ -158,11 +169,6 @@ namespace SteamPipes
 		{
 			ToggleButton((Button)sender);
 			_clickBehaviour = ClickBehaviour.RemoveCondensation;
-		}
-
-		private void StepSimulationButton_Click(object sender, RoutedEventArgs e)
-		{
-			SteamManager.StepSimulation(1);
 		}
 
 		private void PlaceBoilerButton_Click(object sender, RoutedEventArgs e)
@@ -193,6 +199,35 @@ namespace SteamPipes
 		{
 			ToggleButton((Button)sender);
 			_clickBehaviour = ClickBehaviour.ToggleDebug;
+		}
+
+		private void ResumeSimulationButton_Click(object sender, RoutedEventArgs e)
+		{
+			this.State = RunningState.Running;
+		}
+
+		private void StopSimulationButton_Click(object sender, RoutedEventArgs e)
+		{
+			this.State = RunningState.Stopped;
+		}
+
+		private void StepSimulationButton_Click(object sender, RoutedEventArgs e)
+		{
+			StepSimulation();
+		}
+
+		private void StepSimulation()
+		{
+			State = RunningState.Stopped;
+			DoTick();
+		}
+
+		public RunningState State { get; set; }
+
+		public enum RunningState
+		{
+			Running,
+			Stopped
 		}
 	}
 }

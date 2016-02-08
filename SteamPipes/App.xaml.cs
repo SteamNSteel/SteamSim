@@ -13,7 +13,7 @@ namespace SteamPipes
 	public partial class App : Application
 	{
 	    public static readonly SteamTransportRegistry SteamTransportRegistry = new SteamTransportRegistry();
-        private static readonly JobManager JobManagerImpl = new JobManager();
+        public static readonly JobManager JobManagerImpl = new JobManager();
 
 	    public App()
 	    {

@@ -180,21 +180,25 @@ namespace SteamPipes.UI
 		public void InjectSteam(int amount)
 		{
 		    SteamUnit?.GetSteamTransport().AddSteam(amount);
+			InvalidateVisual();
 		}
 
 		public void InjectCondensation(int amount)
 		{
 			SteamUnit?.GetSteamTransport().AddCondensate(amount);
+			InvalidateVisual();
 		}
 
 		public void RemoveSteam(int amount)
 		{
 		    SteamUnit?.GetSteamTransport().TakeSteam(amount);
+			InvalidateVisual();
 		}
 
 		public void RemoveCondensation(int amount)
 		{
 			SteamUnit?.GetSteamTransport().TakeCondensate(amount);
+			InvalidateVisual();
 		}
 
 		public void PlaceBoiler()
@@ -215,6 +219,7 @@ namespace SteamPipes.UI
 		public void ToggleDebug()
 		{
 		    SteamUnit?.GetSteamTransport().ToggleDebug();
+			InvalidateVisual();
 		}
 
 	    private void PlaceSteamUnit<T>() where T : ModTileEntity, new()
