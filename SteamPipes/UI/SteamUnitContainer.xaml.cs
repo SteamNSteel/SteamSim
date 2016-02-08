@@ -182,12 +182,22 @@ namespace SteamPipes.UI
 		    SteamUnit?.GetSteamTransport().AddSteam(amount);
 		}
 
-	    public void RemoveSteam(int amount)
+		public void InjectCondensation(int amount)
+		{
+			SteamUnit?.GetSteamTransport().AddCondensate(amount);
+		}
+
+		public void RemoveSteam(int amount)
 		{
 		    SteamUnit?.GetSteamTransport().TakeSteam(amount);
 		}
 
-	    public void PlaceBoiler()
+		public void RemoveCondensation(int amount)
+		{
+			SteamUnit?.GetSteamTransport().TakeCondensate(amount);
+		}
+
+		public void PlaceBoiler()
 		{
 			PlaceSteamUnit<BoilerTileEntity>();
 		}

@@ -93,6 +93,8 @@ namespace SteamPipes
 			_clickBehaviour = ClickBehaviour.Clear;
 		}
 
+
+
 		protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
 		{
 			var objectIdentified = VisualTreeHelper.HitTest(this, e.GetPosition(this)).VisualHit as SteamUnitContainer;
@@ -115,6 +117,12 @@ namespace SteamPipes
 					case ClickBehaviour.RemoveSteam:
 						objectIdentified.RemoveSteam(100);
 						break;
+					case ClickBehaviour.AddCondensation:
+						objectIdentified.InjectCondensation(100);
+						break;
+					case ClickBehaviour.RemoveCondensation:
+						objectIdentified.RemoveCondensation(100);
+						break;
 					case ClickBehaviour.PlaceBoiler:
 						objectIdentified.PlaceBoiler();
 						break;
@@ -134,10 +142,22 @@ namespace SteamPipes
 			_clickBehaviour = ClickBehaviour.AddSteam;
 		}
 
+		private void AddCondensationButton_Click(object sender, RoutedEventArgs e)
+		{
+			ToggleButton((Button)sender);
+			_clickBehaviour = ClickBehaviour.AddCondensation;
+		}
+
 		private void RemoveSteamButton_Click(object sender, RoutedEventArgs e)
 		{
 			ToggleButton((Button) sender);
 			_clickBehaviour = ClickBehaviour.RemoveSteam;
+		}
+
+		private void RemoveCondensationButton_Click(object sender, RoutedEventArgs e)
+		{
+			ToggleButton((Button)sender);
+			_clickBehaviour = ClickBehaviour.RemoveCondensation;
 		}
 
 		private void StepSimulationButton_Click(object sender, RoutedEventArgs e)

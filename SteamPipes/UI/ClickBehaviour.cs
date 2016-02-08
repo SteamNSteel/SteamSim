@@ -8,6 +8,8 @@
 		PlaceBlock,
 		AddSteam,
 		RemoveSteam,
+		AddCondensation,
+		RemoveCondensation,
 		PlaceBoiler,
 		PlaceBallMill,
 		PlaceFurnace

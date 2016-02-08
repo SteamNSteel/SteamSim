@@ -23,7 +23,7 @@
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="171" />
+            <ColumnDefinition Width="200" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <ui:SteamVis x:Name="SteamVisual" Grid.Column="1" FieldWidth="9" />
@@ -40,26 +40,30 @@
             </Grid>
             <GroupBox Header="Action">
                 <WrapPanel x:Name="PlaceBlockGroup">
-                    <Button x:Name="ClearButton" Content="Clear" Width="75" Height="50" Click="CleareButton_OnClick" />
-                    <Button x:Name="DebugButton" Content="Debug" Width="75" Height="50" Click="DebugButton_OnClick" />
+                    <Button x:Name="ClearButton" Content="Clear" Width="90" Height="50" Click="CleareButton_OnClick" />
+                    <Button x:Name="DebugButton" Content="Debug" Width="90" Height="50" Click="DebugButton_OnClick" />
                     <!--<Label Width="75" />-->
                     <Label Width="75" Height="10" Content=" " />
                     <Label Width="75" />
-                    <Button x:Name="PlacePipeButton" Content="Add Pipe" Width="75" Height="50"
+                    <Button x:Name="PlacePipeButton" Content="Add Pipe" Width="90" Height="50"
                             Click="PlacePipeButton_Click" Background="{DynamicResource PipeButtonBackground}" />
-                    <Button x:Name="PlaceBoilerButton" Content="Add Boiler" Width="75" Height="50"
+                    <Button x:Name="PlaceBoilerButton" Content="Add Boiler" Width="90" Height="50"
                             Click="PlaceBoilerButton_Click" Background="{DynamicResource ProducerButtonBackground}" />
-                    <Button x:Name="PlaceFurnace" Content="Add Furnace" Width="75" Height="50"
+                    <Button x:Name="PlaceFurnace" Content="Add Furnace" Width="90" Height="50"
                             Click="PlaceFurnaceButton_Click" Background="{DynamicResource ConsumerButtonBackground}" />
-                    <Button x:Name="PlaceBallMill" Content="Add Ball Mill" Width="75" Height="50"
+                    <Button x:Name="PlaceBallMill" Content="Add Ball Mill" Width="90" Height="50"
                             Click="PlaceBallMillButton_Click" Background="{DynamicResource ConsumerButtonBackground}" />
                     <!--<Label />-->
                     <Label Width="75" Height="10" Content=" " />
                     <Label Width="75" />
-                    <Button x:Name="AddSteamButton" Content="+ Steam" Width="75" Height="50"
+                    <Button x:Name="AddSteamButton" Content="+ Steam" Width="90" Height="50"
                             Click="AddSteamButton_Click" />
-                    <Button x:Name="RemoveSteamButton" Content="- Steam" Width="75" Height="50"
+                    <Button x:Name="RemoveSteamButton" Content="- Steam" Width="90" Height="50"
                             Click="RemoveSteamButton_Click" />
+                    <Button x:Name="AddCondensationButton" Content="+ Condensation" Width="90" Height="50"
+                            Click="AddCondensationButton_Click" />
+                    <Button x:Name="RemoveCondensationButton" Content="- Condensation" Width="90" Height="50"
+                            Click="RemoveCondensationButton_Click" />
                 </WrapPanel>
             </GroupBox>
             <Button x:Name="StepSimulationButton" Content="Step" Margin="0,16,0,0" Click="StepSimulationButton_Click" />
