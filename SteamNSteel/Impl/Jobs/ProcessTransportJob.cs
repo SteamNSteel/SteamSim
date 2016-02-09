@@ -183,6 +183,7 @@ namespace SteamNSteel.Impl.Jobs
 			if (usableWater <= 0)
 			{
 				TransferWaterFromHigherPoint();
+				return;
 			}
 			//First, work on any units above
 			if (_transportBelow != null)
@@ -202,7 +203,7 @@ namespace SteamNSteel.Impl.Jobs
 		{
 			if (_transportData.Debug)
 			{
-				Console.WriteLine("HERE!");
+				Console.WriteLine($"HERE! {_transport.GetTransportLocation()}");
 			}
 
 			if (_transportBelow == null || !(_transportData.UsableSteam < _transportData.PreviousState.ActualMaximumSteam))
@@ -216,36 +217,70 @@ namespace SteamNSteel.Impl.Jobs
 			}
 
 			Stack<SearchData> elementsToSearch = new Stack<SearchData>();
-			elementsToSearch.Push(new SearchData(_transportBelow.Transport, 0));
+			HashSet<SteamTransportLocation> visitedLocations = new HashSet<SteamTransportLocation>();
+			elementsToSearch.Push(new SearchData(_transportBelow.Transport, 1));
 			SearchData candidate = null;
-			while (elementsToSearch.Any())
+			Boolean validScenario = true;
+			while (validScenario && elementsToSearch.Any())
 			{
+				
 				var searchData = elementsToSearch.Pop();
+
 				var transport = searchData.Transport;
 				var depth = searchData.Depth;
-				var transportPreviousData = searchData.PreviousTransportState;
-
-				if (depth < 0 && (candidate == null || depth < candidate.Depth))
+				var steamTransportLocation = transport.GetTransportLocation();
+				Console.WriteLine($"Checking transport @ {steamTransportLocation} - {depth} - {_transport.GetShouldDebug()}");
+				visitedLocations.Add(steamTransportLocation);
+			
+				if (depth <= 0 && (candidate == null || depth < candidate.Depth))
 				{
-					candidate = searchData;
+					if (searchData.Depth == 0 && searchData.Transport.GetSteamStored() <= transport.GetSteamStored())
+					{
+						candidate = searchData;
+					}
 				}
 
 				foreach (var direction in EnumFacing.VALID_DIRECTIONS)
 				{
-					if (transport.CanConnect(direction))
+					var adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
+					if (adjacentTransport != null && !visitedLocations.Contains(adjacentTransport.GetTransportLocation()))
 					{
-						if (!(Math.Abs(transportPreviousData.CondensationStored - transportPreviousData.MaximumCondensation) >= 100))
+						var steamTransportTransientData = TheMod.SteamTransportStateMachine.GetJobDataForTransport(adjacentTransport);
+						var nextPreviousData = steamTransportTransientData.PreviousState;
+
+						if ((direction == EnumFacing.EAST || direction == EnumFacing.WEST || direction == EnumFacing.NORTH ||
+						     direction == EnumFacing.SOUTH) &&
+						    nextPreviousData.CondensationStored < nextPreviousData.MaximumCondensation - 10)
 						{
-							var newDepth = depth + direction.offsetZ;
-							elementsToSearch.Push(new SearchData(transport.GetAdjacentTransport(EnumFacing.UP), newDepth));
+							validScenario = false;
+							break;
 						}
+
+						if (nextPreviousData.CondensationStored > 10)
+						{
+							var newDepth = depth + direction.offsetY;
+							elementsToSearch.Push(new SearchData(adjacentTransport, newDepth));
+						}
+					}
+					else
+					{
+						//Console.WriteLine($"Not a Valid location @ {transport.GetTransportLocation().Offset(direction)}");
 					}
 				}
 			}
 
-			if (_transportData.Debug)
+			if (candidate != null)
 			{
-				Console.WriteLine("bleah");
+				if (candidate.Depth == 0)
+				{
+					var takeCondensation = candidate.Transport.TakeCondensate(1);
+					_transportData.AddCondensate(takeCondensation);
+				}
+				else
+				{
+					var takeCondensation = candidate.Transport.TakeCondensate(100);
+					_transportData.AddCondensate(takeCondensation);
+				}
 			}
 		}
 
@@ -253,12 +288,10 @@ namespace SteamNSteel.Impl.Jobs
 		{
 			internal readonly SteamTransport Transport;
 			internal readonly int Depth;
-			internal readonly SteamTransportTransientData.PreviousTransportState PreviousTransportState;
 
 			public SearchData(ISteamTransport transport, int depth)
 			{
 				Transport = (SteamTransport)transport;
-				PreviousTransportState = TheMod.SteamTransportStateMachine.GetJobDataForTransport(Transport).PreviousState;
 				Depth = depth;
 			}
 		}

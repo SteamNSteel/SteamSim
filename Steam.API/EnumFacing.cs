@@ -76,7 +76,17 @@
             return v._ordinal;
         }
 
-	    public override string ToString()
+	    public static bool operator ==(EnumFacing a, EnumFacing b)
+	    {
+		    return a._ordinal == b._ordinal;
+	    }
+
+		public static bool operator !=(EnumFacing a, EnumFacing b)
+		{
+			return a._ordinal != b._ordinal;
+		}
+
+		public override string ToString()
 	    {
 		    return $"ForgeDirection ({_name})";
 	    }
