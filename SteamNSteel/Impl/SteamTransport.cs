@@ -6,7 +6,6 @@ namespace SteamNSteel.Impl
     class SteamTransport : ISteamTransport
     {
         private readonly SteamTransportLocation _steamTransportLocation;
-        private SteamTransportTopology _topology;
 
 	    internal SteamTransport(SteamTransportLocation steamTransportLocation)
         {
@@ -28,38 +27,31 @@ namespace SteamNSteel.Impl
         readonly bool[] _canConnect = new bool[6];
 
         private bool _debug;
-	    public readonly object _syncObj = new object();
 	    public bool StructureChanged;
 
-	    public void AddSteam(double unitsOfSteam)
+	    public void addSteam(double unitsOfSteam)
         {
             if (_steamStored + unitsOfSteam >= _maximumSteam)
             {   
                 _steamStored = _maximumSteam;
-                //return (_maximumWater - _waterStored);
                 return;
             }
 
             _steamStored += unitsOfSteam;
-
-            //return 0;
         }
 
-        public void AddCondensate(double unitsOfWater)
+        public void addCondensate(double unitsOfWater)
         {
             if (_waterStored + unitsOfWater >= _maximumWater)
             {
                 _waterStored = _maximumWater;
-                //return (_maximumWater - _waterStored);
                 return;
             }
 
             _waterStored += unitsOfWater;
-
-            //return 0;
         }
 
-        public double TakeSteam(double desiredUnitsOfSteam)
+        public double takeSteam(double desiredUnitsOfSteam)
         {
 	        if (_steamStored <= 0)
 	        {
@@ -77,7 +69,7 @@ namespace SteamNSteel.Impl
             return actualUnitsOfSteam;
         }
 
-        public double TakeCondensate(double desiredUnitsOfWater)
+        public double takeCondensate(double desiredUnitsOfWater)
         {
 	        if (_waterStored <= 0)
 	        {
@@ -96,122 +88,107 @@ namespace SteamNSteel.Impl
             return actualUnitsOfSteam;
         }
 
-        public void SetMaximumSteam(double maximumUnitsOfSteam)
+        public void setMaximumSteam(double maximumUnitsOfSteam)
         {
             _maximumSteam = maximumUnitsOfSteam;
         }
 
-        public void SetMaximumCondensate(double maximimUnitsOfWater)
+        public void setMaximumCondensate(double maximimUnitsOfWater)
         {
             _maximumWater = maximimUnitsOfWater;
         }
 
-        public void ToggleDebug()
+        public void toggleDebug()
         {
             _debug = !_debug;
         }
 
-        public bool GetShouldDebug()
+        public bool getShouldDebug()
         {
             return _debug;
         }
 
-        public double GetSteamStored()
+        public double getSteamStored()
         {
             return _steamStored;
         }
 
-        public double GetWaterStored()
+        public double getWaterStored()
         {
             return _waterStored;
         }
 
-        public double GetMaximumWater()
+        public double getMaximumWater()
         {
             return _maximumWater;
         }
 
-        public double GetMaximumSteam()
+        public double getMaximumSteam()
         {
             return _maximumSteam;
         }
 
-        public double GetTemperature()
+        public double getTemperature()
         {
             return _temperature;
         }
 
-		public void SetTemperature(double temperature)
+		public void setTemperature(double temperature)
 		{
 			_temperature = temperature;
 		}
 
-		public double GetHeatConductivity()
+		public double getHeatConductivity()
 		{
 			return _heatConductivity;
 		}
-
 		
-
-
-
-        public void SetCanConnect(EnumFacing direction, bool canConnect)
+        public void setCanConnect(EnumFacing direction, bool canConnect)
         {
             _canConnect[(int)direction] = canConnect;
         }
 
-        public bool CanConnect(EnumFacing direction)
+        public bool canConnect(EnumFacing direction)
         {
             return _canConnect[(int) direction];
         }
 
-        public void SetAdjacentTransport(EnumFacing direction, ISteamTransport transport)
+        public void setAdjacentTransport(EnumFacing direction, ISteamTransport transport)
         {
-            if (CanConnect(direction))
+            if (canConnect(direction))
 
             _adjacentTransports[(int)direction] = transport;
 	        StructureChanged = true;
         }
 
-        public ISteamTransport GetAdjacentTransport(EnumFacing direction)
+        public ISteamTransport getAdjacentTransport(EnumFacing direction)
         {
             return _adjacentTransports[(int)direction];
         }
 
-        public bool CanTransportAbove()
+        public bool canTransportAbove()
         {
             return _adjacentTransports[(int) EnumFacing.UP] != null;
         }
 
-        public bool CanTransportBelow()
+        public bool canTransportBelow()
         {
             return _adjacentTransports[(int)EnumFacing.DOWN] != null;
         }
 
 		[Obsolete]
-        public bool CanTransportWest()
+        public bool canTransportWest()
         {
             return _adjacentTransports[(int)EnumFacing.WEST] != null;
         }
 
 		[Obsolete]
-		public bool CanTransportEast()
+		public bool canTransportEast()
         {
             return _adjacentTransports[(int)EnumFacing.EAST] != null;
         }
 
-        internal SteamTransportTopology GetTopology()
-        {
-            return _topology;
-        }
-
-        internal void SetTopology(SteamTransportTopology topology)
-        {
-            _topology = topology;
-	        topology.AddTransport(this);
-        }
-
-        internal SteamTransportLocation GetTransportLocation()
+        internal SteamTransportLocation getTransportLocation()
         {
             return _steamTransportLocation;
         }

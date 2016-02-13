@@ -1,17 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Navigation;
 using Steam.Machines;
 using SteamNSteel;
-using SteamNSteel.API;
-using SteamNSteel.Jobs;
 using SteamPipes.UI;
 
 namespace SteamPipes
@@ -30,8 +26,6 @@ namespace SteamPipes
 			InitializeComponent();
 
 			PlacePipeButton_Click(PlacePipeButton, null);
-			SteamManager.StartSimulationThread();
-		    //App.SteamTransportRegistry.StartSimulationThread();
 		    StartTickThread();
 		}
 
@@ -192,7 +186,6 @@ namespace SteamPipes
 		protected override void OnClosed(EventArgs e)
 		{
 			base.OnClosed(e);
-			SteamManager.Stop();
 		}
 
 		private void DebugButton_OnClick(object sender, RoutedEventArgs e)

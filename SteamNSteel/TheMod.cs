@@ -13,6 +13,7 @@ namespace SteamNSteel
 		internal static SteamTransportRegistry SteamTransportRegistry;
 		internal static SteamTransportStateMachine SteamTransportStateMachine;
 		internal static JobManager JobManager;
+
 		public static int CurrentTick { get; private set; }
 
 		public static void OnSteamNSteelInitialized(SteamNSteelInitializedEvent evt)

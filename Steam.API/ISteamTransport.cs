@@ -2,35 +2,35 @@
 {
     public interface ISteamTransport
     {
-        void AddSteam(double unitsOfSteam);
+        void addSteam(double unitsOfSteam);
 
-        void AddCondensate(double unitsOfWater);
+        void addCondensate(double unitsOfWater);
 
-		double TakeSteam(double desiredUnitsOfSteam);
+		double takeSteam(double desiredUnitsOfSteam);
 
-		double TakeCondensate(double desiredUnitsOfWater);
+		double takeCondensate(double desiredUnitsOfWater);
 
-        void SetMaximumSteam(double maximumUnitsOfSteam);
+        void setMaximumSteam(double maximumUnitsOfSteam);
 
-        void SetMaximumCondensate(double maximimUnitsOfWater);
+        void setMaximumCondensate(double maximimUnitsOfWater);
 
-        void ToggleDebug();
+        void toggleDebug();
 
-        bool GetShouldDebug();
-		double GetSteamStored();
-		double GetWaterStored();
-		double GetMaximumWater();
+        bool getShouldDebug();
+		double getSteamStored();
+		double getWaterStored();
+		double getMaximumWater();
 
-		double GetMaximumSteam();
+		double getMaximumSteam();
         
 		//double GetCalculatedMaximumSteam();
-        double GetTemperature();
+        double getTemperature();
         
 
-        bool CanTransportAbove();
-        bool CanTransportBelow();
-        bool CanTransportWest();
-        bool CanTransportEast();
+        bool canTransportAbove();
+        bool canTransportBelow();
+        bool canTransportWest();
+        bool canTransportEast();
 
     }
 }   

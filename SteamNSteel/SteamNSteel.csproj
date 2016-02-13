@@ -41,11 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\ISteamConsumer.cs" />
-    <Compile Include="API\ISteamProvider.cs" />
-    <Compile Include="API\PointI2D.cs" />
-    <Compile Include="API\SteamManager.cs" />
-    <Compile Include="API\SteamUnit.cs" />
     <Compile Include="Impl\Jobs\ProcessTransportJob.cs" />
     <Compile Include="Impl\Jobs\UnregisterTransportJob.cs" />
     <Compile Include="Impl\Jobs\RegisterTransportJob.cs" />
@@ -56,7 +51,6 @@
     <Compile Include="Impl\SteamTransportLocation.cs" />
     <Compile Include="Impl\SteamTransportRegistry.cs" />
     <Compile Include="Impl\SteamTransportStateMachine.cs" />
-    <Compile Include="Impl\SteamTransportTopology.cs" />
     <Compile Include="Jobs\IJob.cs" />
     <Compile Include="Jobs\IJobManager.cs" />
     <Compile Include="Jobs\JobManager.cs" />

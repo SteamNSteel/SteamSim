@@ -11,14 +11,7 @@ namespace SteamNSteel.Jobs
         private bool running = true;
         private BlockingCollection<IJob> _backgroundJobs = new BlockingCollection<IJob>(); 
 		private ConcurrentQueue<IJob> _pretickJobs = new ConcurrentQueue<IJob>();
-
-        public JobManager()
-        {
-            
-        }
-
-	    
-
+		
 	    public void AddBackgroundJob(IJob job)
 	    {
 		    _backgroundJobs.Add(job);
@@ -36,7 +29,7 @@ namespace SteamNSteel.Jobs
 			    IJob job;
 			    if (_pretickJobs.TryDequeue(out job))
 			    {
-				    job.Execute();
+				    job.execute();
 			    }
 		    }
 	    }
@@ -46,7 +39,7 @@ namespace SteamNSteel.Jobs
             Stop();
             _backgroundJobs = new BlockingCollection<IJob>();
             running = true;
-	        var processorCount = Environment.ProcessorCount;
+	        int processorCount = Environment.ProcessorCount;
 	        processorCount = 1;
 	        for (int i = 0; i < processorCount; ++i)
             {
@@ -61,7 +54,7 @@ namespace SteamNSteel.Jobs
         {
             running = false;
             _backgroundJobs.CompleteAdding();
-            foreach (var thread in JobThreads)
+            foreach (Thread thread in JobThreads)
             {
                 thread.Join();
             }
@@ -72,13 +65,11 @@ namespace SteamNSteel.Jobs
         {
             while (running)
             {
-                foreach (var job in _backgroundJobs.GetConsumingEnumerable())
+                foreach (IJob job in _backgroundJobs.GetConsumingEnumerable())
                 {
-                    job.Execute();
+                    job.execute();
                 }
             }
         }
-
-	    
     }
 }

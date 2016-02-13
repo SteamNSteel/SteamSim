@@ -7,36 +7,40 @@
 		public SteamTransportTransientData(SteamTransport transport)
 		{
 			this.transport = transport;
-			//WaterFlowSourceUnits = new List<SteamTransportTransientData>(6);
-			//SteamFlowSourceUnits = new List<SteamTransportTransientData>(6);
 		}
 
-		internal void VerifyTick()
+		internal void verifyTick()
 		{
 			lock (lockObj)
 			{
 				if (tickLastUpdated != TheMod.CurrentTick)
 				{
-					PreviousState.SteamStored = transport.GetSteamStored();
-					PreviousState.CondensationStored = transport.GetWaterStored();
-					PreviousState.Temperature = transport.GetTemperature();
-					PreviousState.MaximumCondensation = transport.GetMaximumWater();
-					PreviousState.ActualMaximumSteam = SteamMaths.CalculateMaximumSteam(
-						PreviousState.CondensationStored,
-						transport.GetMaximumWater(), 
-						transport.GetMaximumSteam()
+					_previousState.SteamStored = transport.getSteamStored();
+					_previousState.CondensationStored = transport.getWaterStored();
+					_previousState.Temperature = transport.getTemperature();
+					_previousState.MaximumCondensation = transport.getMaximumWater();
+					_previousState.ActualMaximumSteam = SteamMaths.calculateMaximumSteam(
+						_previousState.CondensationStored,
+						transport.getMaximumWater(), 
+						transport.getMaximumSteam()
 					);
-					PreviousState.SteamDensity = SteamMaths.CalculateSteamDensity(PreviousState.SteamStored, PreviousState.ActualMaximumSteam);
-					CondensationAdded = 0;
-					SteamAdded = 0;
+					_previousState.SteamDensity = SteamMaths.calculateSteamDensity(_previousState.SteamStored, _previousState.ActualMaximumSteam);
+					_condensationAdded = 0;
+					_steamAdded = 0;
 					tickLastUpdated = TheMod.CurrentTick;
 				}
 			}
 		}
 
 		private readonly SteamTransport transport;
+		private double _condensationAdded;
+		private double _steamAdded;
+		private readonly PreviousTransportState _previousState = new PreviousTransportState();
 
-		public PreviousTransportState PreviousState { get; } = new PreviousTransportState();
+		public PreviousTransportState getPreviousState()
+		{
+			return _previousState;
+		}
 
 		internal class PreviousTransportState
 		{
@@ -48,89 +52,83 @@
 			public double SteamDensity { get; internal set; }
 		}
 
-		internal class NewTransportState : SteamTransportTransientData.PreviousTransportState
+		public double takeSteam(double amount)
 		{
-
-		}
-
-		//public double newSteam;
-		//public double newCondensation;
-
-		//public List<SteamTransportTransientData> WaterFlowSourceUnits { get; set; }
-		//public List<SteamTransportTransientData> SteamFlowSourceUnits { get; set; }
-
-		/*internal class StateData : ISteamTransport
-		{
-			void AddSteam(double unitsOfSteam);
-
-			void AddCondensate(double unitsOfWater);
-
-			double TakeSteam(double desiredUnitsOfSteam);
-
-			double TakeCondensate(double desiredUnitsOfWater);
-
-			double GetSteamStored();
-			double GetWaterStored();
-			double GetMaximumWater();
-		}*/
-
-		public double TakeSteam(double amount)
-		{
-			var amountTaken = transport.TakeSteam(amount);
+			double amountTaken = transport.takeSteam(amount);
 			//TODO: subtract from SteamAdded?
 			return amountTaken;
 		}
 
-		public double TakeCondensate(double amount)
+		public double takeCondensate(double amount)
 		{
-			var amountTaken = transport.TakeCondensate(amount);
+			double amountTaken = transport.takeCondensate(amount);
 			//TODO: subtract from CondensationAdded?
 			return amountTaken;
 		}
 
-		public void AddCondensate(double waterGained)
+		public void addCondensate(double waterGained)
 		{
-			transport.AddCondensate(waterGained);
-			CondensationAdded += waterGained;
+			transport.addCondensate(waterGained);
+			_condensationAdded += waterGained;
 		}
 
-		public void AddSteam(double amount)
+		public void addSteam(double amount)
 		{
-			transport.AddSteam(amount);
-			SteamAdded += amount;
+			transport.addSteam(amount);
+			_steamAdded += amount;
 		}
 
-		public double CondensationAdded { get; private set; }
-
-		public double SteamAdded { get; private set; }
-
-		public double Temperature
+		public double getCondensationAdded()
 		{
-			get { return transport.GetTemperature(); }
-			set
+			return _condensationAdded;
+		}
+
+		public double getSteamAdded()
+		{
+			return _steamAdded;
+		}
+
+		public double getTemperature()
+		{
+				return transport.getTemperature();
+		}
+
+		public void setTemperature(double value) { 
+			double temperature = value;
+			if (temperature > 100)
 			{
-				var temperature = value;
-				if (temperature > 100)
-				{
-					temperature = 100;
-				}
-				if (temperature < 0)
-				{
-					temperature = 0;
-				}
-				transport.SetTemperature(temperature);
+				temperature = 100;
 			}
+			if (temperature < 0)
+			{
+				temperature = 0;
+			}
+			transport.setTemperature(temperature);
 		}
 
-		public double UsableSteam => PreviousState.SteamStored - SteamAdded;
-		public double UsableWater => PreviousState.CondensationStored - CondensationAdded;
-		public bool Debug => transport.GetShouldDebug();
-
-		public int TickLastUpdated
+		public double getUsableSteam()
 		{
-			get { return tickLastUpdated; }
+			return _previousState.SteamStored - _steamAdded;
 		}
 
-		public SteamTransport Transport => transport;
+		public double getUsableWater()
+		{
+			return _previousState.CondensationStored - _condensationAdded;
+		}
+
+		public bool getDebug()
+		{
+			return transport.getShouldDebug();
+		}
+
+		public int getTickLastUpdated()
+		{
+			return tickLastUpdated;
+		}
+
+		public SteamTransport getTransport()
+		{
+			return transport;
+		}
 	}
 }

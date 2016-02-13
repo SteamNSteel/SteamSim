@@ -11,7 +11,7 @@ namespace Steam.Machines
         public override void OnTick()
         {
             
-            GetSteamTransport().TakeSteam(2);
+            GetSteamTransport().takeSteam(2);
             base.OnTick();
 
         }

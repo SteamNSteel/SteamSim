@@ -5,7 +5,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Steam.Machines;
-using SteamNSteel.API;
 using SteamNSteel.Impl;
 
 namespace SteamPipes.UI
@@ -41,7 +40,7 @@ namespace SteamPipes.UI
 				//if (SteamUnit.Debug)
 				//TODO: Vary colour by pipe temperature
 				//{
-					var colorBrush = steamTransport.GetShouldDebug() ? Brushes.Red : Brushes.Blue;
+					var colorBrush = steamTransport.getShouldDebug() ? Brushes.Red : Brushes.Blue;
 					drawingContext.DrawRoundedRectangle(Brushes.Transparent, new Pen(colorBrush, 2), new Rect(RenderSize), 5, 5);
 				//}
 
@@ -55,16 +54,16 @@ namespace SteamPipes.UI
 					solidColorBrush = Brushes.Tomato;
 				}
 
-				var waterUsage = (steamTransport.GetWaterStored()/(double)steamTransport.GetMaximumWater());
+				var waterUsage = (steamTransport.getWaterStored()/(double)steamTransport.getMaximumWater());
 				var waterHeightPixels = RenderSize.Height*waterUsage;
-				var actualMaximumSteam = SteamMaths.CalculateMaximumSteam(
-						steamTransport.GetWaterStored(),
-						steamTransport.GetMaximumWater(),
-						steamTransport.GetMaximumSteam()
+				var actualMaximumSteam = SteamMaths.calculateMaximumSteam(
+						steamTransport.getWaterStored(),
+						steamTransport.getMaximumWater(),
+						steamTransport.getMaximumSteam()
 					);
 
-				var steamDensity = SteamMaths.CalculateSteamDensity(
-					steamTransport.GetSteamStored(),
+				var steamDensity = SteamMaths.calculateSteamDensity(
+					steamTransport.getSteamStored(),
 					actualMaximumSteam);
 				var steamRenderHeight = Math.Max(0, (RenderSize.Height - waterHeightPixels)* steamDensity / 100);
 				
@@ -73,7 +72,7 @@ namespace SteamPipes.UI
 				drawingContext.DrawRectangle(Brushes.CornflowerBlue, null,
 					new Rect(new Point(0, RenderSize.Height - waterHeightPixels), new Size(RenderSize.Width, waterHeightPixels)));
 
-				if (steamTransport.CanTransportAbove())
+				if (steamTransport.canTransportAbove())
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*0/4),
@@ -89,7 +88,7 @@ namespace SteamPipes.UI
 						new Point(RenderSize.Width*3/4, RenderSize.Height*1/4));
 				}
 
-				if (steamTransport.CanTransportBelow())
+				if (steamTransport.canTransportBelow())
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*3/4),
@@ -105,7 +104,7 @@ namespace SteamPipes.UI
 						new Point(RenderSize.Width*3/4, RenderSize.Height*3/4));
 				}
 
-				if (steamTransport.CanTransportWest())
+				if (steamTransport.canTransportWest())
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*0/4, RenderSize.Height*1/4),
@@ -120,7 +119,7 @@ namespace SteamPipes.UI
 						new Point(RenderSize.Width*1/4, RenderSize.Height*1/4),
 						new Point(RenderSize.Width*1/4, RenderSize.Height*3/4));
 				}
-				if (steamTransport.CanTransportEast())
+				if (steamTransport.canTransportEast())
 				{
 					drawingContext.DrawLine(new Pen(solidColorBrush, 4.0),
 						new Point(RenderSize.Width*3/4, RenderSize.Height*1/4),
@@ -138,7 +137,7 @@ namespace SteamPipes.UI
 
 				double y = 0;
 				var text =
-					new FormattedText($"steam: {steamTransport.GetSteamStored():0}/{actualMaximumSteam:0}",
+					new FormattedText($"steam: {steamTransport.getSteamStored():0}/{actualMaximumSteam:0}",
 						CultureInfo.CurrentUICulture,
 						FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
@@ -149,13 +148,13 @@ namespace SteamPipes.UI
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText($"water: {steamTransport.GetWaterStored():0}/{steamTransport.GetMaximumWater():0}",
+				text = new FormattedText($"water: {steamTransport.getWaterStored():0}/{steamTransport.getMaximumWater():0}",
 					CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 
 				y += text.Height + 2;
-				text = new FormattedText($"temp: {Math.Floor(steamTransport.GetTemperature())}%", CultureInfo.CurrentUICulture,
+				text = new FormattedText($"temp: {Math.Floor(steamTransport.getTemperature())}%", CultureInfo.CurrentUICulture,
 					FlowDirection.LeftToRight, new Typeface("Ariel"), 14, Brushes.Black);
 				drawingContext.DrawText(text, new Point(0, y));
 			}
@@ -179,25 +178,25 @@ namespace SteamPipes.UI
 
 		public void InjectSteam(int amount)
 		{
-		    SteamUnit?.GetSteamTransport().AddSteam(amount);
+		    SteamUnit?.GetSteamTransport().addSteam(amount);
 			InvalidateVisual();
 		}
 
 		public void InjectCondensation(int amount)
 		{
-			SteamUnit?.GetSteamTransport().AddCondensate(amount);
+			SteamUnit?.GetSteamTransport().addCondensate(amount);
 			InvalidateVisual();
 		}
 
 		public void RemoveSteam(int amount)
 		{
-		    SteamUnit?.GetSteamTransport().TakeSteam(amount);
+		    SteamUnit?.GetSteamTransport().takeSteam(amount);
 			InvalidateVisual();
 		}
 
 		public void RemoveCondensation(int amount)
 		{
-			SteamUnit?.GetSteamTransport().TakeCondensate(amount);
+			SteamUnit?.GetSteamTransport().takeCondensate(amount);
 			InvalidateVisual();
 		}
 
@@ -218,7 +217,7 @@ namespace SteamPipes.UI
 
 		public void ToggleDebug()
 		{
-		    SteamUnit?.GetSteamTransport().ToggleDebug();
+		    SteamUnit?.GetSteamTransport().toggleDebug();
 			InvalidateVisual();
 		}
 

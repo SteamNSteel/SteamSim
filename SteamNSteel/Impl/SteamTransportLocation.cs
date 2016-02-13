@@ -12,12 +12,12 @@ namespace SteamNSteel.Impl
             WorldId = worldId;
         }
 
-		public static SteamTransportLocation Create(int x, int y)
+		public static SteamTransportLocation create(int x, int y)
 		{
 			return new SteamTransportLocation(x, y, 0, 0);
 		}
 
-		public static SteamTransportLocation Create(int x, int y, int z, int worldId)
+		public static SteamTransportLocation create(int x, int y, int z, int worldId)
 	    {
 		    return new SteamTransportLocation(x, y, z, worldId);
 	    }
@@ -52,7 +52,7 @@ namespace SteamNSteel.Impl
             return Equals((SteamTransportLocation) obj);
         }
 
-	    public SteamTransportLocation Offset(EnumFacing direction)
+	    public SteamTransportLocation offset(EnumFacing direction)
 	    {
 			//Fixme: Use a pool?
 		    return new SteamTransportLocation(X + direction.offsetX, Y + direction.offsetY, Z + direction.offsetZ, WorldId);

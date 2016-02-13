@@ -11,7 +11,7 @@ namespace Steam.Machines
         public override void SetLocation(int x, int y)
         {
             base.SetLocation(x, y);
-            _steamTransport = ChildMod.SteamTransportRegistry.RegisterSteamTransport(x, y, GetValidSteamTransportDirections());
+            _steamTransport = ChildMod.SteamTransportRegistry.registerSteamTransport(x, y, GetValidSteamTransportDirections());
             ChildMod.AddTileEntity(this);
         }
 
@@ -37,7 +37,7 @@ namespace Steam.Machines
 
         public void Destroy()
         {
-            ChildMod.SteamTransportRegistry.DestroySteamTransport(_x, _y);
+            ChildMod.SteamTransportRegistry.destroySteamTransport(_x, _y);
             ChildMod.RemoveTileEntity(this);
         }
 

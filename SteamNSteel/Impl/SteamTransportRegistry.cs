@@ -12,9 +12,9 @@ namespace SteamNSteel.Impl
         private readonly ConcurrentDictionary<SteamTransportLocation, SteamTransport> _steamTransports =
             new ConcurrentDictionary<SteamTransportLocation, SteamTransport>();
 
-        public ISteamTransport RegisterSteamTransport(int x, int y, EnumFacing[] initialAllowedDirections)
+        public ISteamTransport registerSteamTransport(int x, int y, EnumFacing[] initialAllowedDirections)
         {
-			SteamTransportLocation steamTransportLocation = SteamTransportLocation.Create(x, y);
+			SteamTransportLocation steamTransportLocation = SteamTransportLocation.create(x, y);
             SteamTransport result = _steamTransports.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
 
 			bool[] allowedDirections = new bool[6];
@@ -27,17 +27,17 @@ namespace SteamNSteel.Impl
 	        foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
 	        {
 		        bool canConnect = allowedDirections[(int) direction];
-		        result.SetCanConnect(direction, canConnect);
+		        result.setCanConnect(direction, canConnect);
 	        }
 
 	        TheMod.SteamTransportStateMachine.AddTransport(result);
 			return result;
         }
 
-        public void DestroySteamTransport(int x, int y)
+        public void destroySteamTransport(int x, int y)
         {
             SteamTransport transport;
-            var steamTransportLocation = SteamTransportLocation.Create(x, y);
+            var steamTransportLocation = SteamTransportLocation.create(x, y);
 
 	        if (_steamTransports.TryRemove(steamTransportLocation, out transport))
 	        {
@@ -45,7 +45,7 @@ namespace SteamNSteel.Impl
 	        }
         }
 
-		public ISteamTransport GetSteamTransportAtLocation(SteamTransportLocation steamTransportLocation)
+		public ISteamTransport getSteamTransportAtLocation(SteamTransportLocation steamTransportLocation)
 		{
 			SteamTransport value;
 			if (_steamTransports.TryGetValue(steamTransportLocation, out value))

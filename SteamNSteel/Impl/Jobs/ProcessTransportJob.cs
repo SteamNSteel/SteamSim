@@ -25,105 +25,105 @@ namespace SteamNSteel.Impl.Jobs
 			_config = config;
 		}
 
-		public void Execute()
+		public void execute()
 		{
 			try
 			{
 				if (_transportData == null || _transport.StructureChanged)
 				{
-					UpdateLocalData();
+					updateLocalData();
 
 					_transport.StructureChanged = false;
 				}
 
-				_transportData.VerifyTick();
+				_transportData.verifyTick();
 
-				TransferSteam();
-				CalculateUnitHeat();
-				TransferWater();
-				CondenseSteam();
+				transferSteam();
+				calculateUnitHeat();
+				transferWater();
+				condenseSteam();
 			}
 			catch (Exception e)
 			{
 				Console.WriteLine(e);
 			}
 
-			_notificationRecipient.JobComplete();
+			_notificationRecipient.jobComplete();
 		}
 
-		private void UpdateLocalData()
+		private void updateLocalData()
 		{
 			SteamTransportStateMachine stateMachine = TheMod.SteamTransportStateMachine;
 			List<SteamTransportTransientData> adjacentTransports = new List<SteamTransportTransientData>();
 
-			SteamTransport adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(EnumFacing.NORTH);
+			SteamTransport adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(EnumFacing.NORTH);
 			if (adjacentTransport != null)
 			{
-				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
+				adjacentTransports.Add(stateMachine.getJobDataForTransport(adjacentTransport));
 			}
-			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(EnumFacing.EAST);
+			adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(EnumFacing.EAST);
 			if (adjacentTransport != null)
 			{
-				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
+				adjacentTransports.Add(stateMachine.getJobDataForTransport(adjacentTransport));
 			}
-			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(EnumFacing.SOUTH);
+			adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(EnumFacing.SOUTH);
 			if (adjacentTransport != null)
 			{
-				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
+				adjacentTransports.Add(stateMachine.getJobDataForTransport(adjacentTransport));
 			}
-			adjacentTransport = (SteamTransport) _transport.GetAdjacentTransport(EnumFacing.WEST);
+			adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(EnumFacing.WEST);
 			if (adjacentTransport != null)
 			{
-				adjacentTransports.Add(stateMachine.GetJobDataForTransport(adjacentTransport));
+				adjacentTransports.Add(stateMachine.getJobDataForTransport(adjacentTransport));
 			}
 			_horizontalAdjacentTransports = adjacentTransports.ToArray();
 
-			adjacentTransport = (SteamTransport)_transport.GetAdjacentTransport(EnumFacing.UP);
-			_transportAbove = adjacentTransport == null ? null : stateMachine.GetJobDataForTransport(adjacentTransport);
+			adjacentTransport = (SteamTransport)_transport.getAdjacentTransport(EnumFacing.UP);
+			_transportAbove = adjacentTransport == null ? null : stateMachine.getJobDataForTransport(adjacentTransport);
 			if (_transportAbove != null)
 			{
 				adjacentTransports.Add(_transportAbove);
 			}
-			adjacentTransport = (SteamTransport)_transport.GetAdjacentTransport(EnumFacing.DOWN);
-			_transportBelow = adjacentTransport == null ? null : stateMachine.GetJobDataForTransport(adjacentTransport);
+			adjacentTransport = (SteamTransport)_transport.getAdjacentTransport(EnumFacing.DOWN);
+			_transportBelow = adjacentTransport == null ? null : stateMachine.getJobDataForTransport(adjacentTransport);
 			if (_transportBelow != null)
 			{
 				adjacentTransports.Add(_transportBelow);
 			}
 
 			_allAdjacentTransports = adjacentTransports.ToArray();
-			_transportData = stateMachine.GetJobDataForTransport(_transport);
+			_transportData = stateMachine.getJobDataForTransport(_transport);
 		}
 
-		private void CondenseSteam()
+		private void condenseSteam()
 		{
-			double usableSteam = _transportData.PreviousState.SteamStored;
+			double usableSteam = _transportData.getPreviousState().SteamStored;
 
-			double newCondensation = usableSteam * _config.CondensationRatePerTick * ((100 - _transportData.PreviousState.Temperature) / 100);
-			double takenCondensation = _transportData.TakeSteam(newCondensation);
+			double newCondensation = usableSteam * _config.CondensationRatePerTick * ((100 - _transportData.getPreviousState().Temperature) / 100);
+			double takenCondensation = _transportData.takeSteam(newCondensation);
 			double waterGained = takenCondensation * _config.SteamToWaterRatio;
-			_transportData.AddCondensate(waterGained);
+			_transportData.addCondensate(waterGained);
 		}
 
-		private void CalculateUnitHeat()
+		private void calculateUnitHeat()
 		{
-			double unitTemperature = _transportData.PreviousState.Temperature;
-			double tempDifference = _transportData.PreviousState.SteamDensity - unitTemperature;
+			double unitTemperature = _transportData.getPreviousState().Temperature;
+			double tempDifference = _transportData.getPreviousState().SteamDensity - unitTemperature;
 
-			double temperature = unitTemperature + (_transport.GetHeatConductivity() * (tempDifference / 100));
-			_transportData.Temperature = temperature;
+			double temperature = unitTemperature + (_transport.getHeatConductivity() * (tempDifference / 100));
+			_transportData.setTemperature(temperature);
 		}
 
-		private void TransferSteam()
+		private void transferSteam()
 		{
-			double usableSteam = _transportData.PreviousState.SteamStored;
+			double usableSteam = _transportData.getPreviousState().SteamStored;
 
 			if (usableSteam <= 0) return;
 
-			TransferSteam(usableSteam);
+			transferSteam(usableSteam);
 		}
 
-		private void TransferSteam(double usableSteam)
+		private void transferSteam(double usableSteam)
 		{
 			_eligibleTransportData.Clear();
 			double steamSpaceAvailable = 0;
@@ -131,8 +131,8 @@ namespace SteamNSteel.Impl.Jobs
 			foreach (SteamTransportTransientData neighbourUnit in _allAdjacentTransports)
 			{
 				//Steam providers can always push?
-				double neighbourSteamStored = neighbourUnit.PreviousState.SteamStored;
-				double neighbourMaximumSteam = neighbourUnit.PreviousState.ActualMaximumSteam;
+				double neighbourSteamStored = neighbourUnit.getPreviousState().SteamStored;
+				double neighbourMaximumSteam = neighbourUnit.getPreviousState().ActualMaximumSteam;
 				if (neighbourSteamStored < neighbourMaximumSteam && neighbourSteamStored < usableSteam)
 				{
 					_eligibleTransportData.Add(neighbourUnit);
@@ -140,11 +140,11 @@ namespace SteamNSteel.Impl.Jobs
 				}
 			}
 
-			double calculatedSteamDensity = _transportData.PreviousState.SteamDensity;
-			if (_transportBelow != null && calculatedSteamDensity >= _config.EQUILIBRIUM && _transportBelow.PreviousState.SteamStored < _transportData.PreviousState.SteamStored)
+			double calculatedSteamDensity = _transportData.getPreviousState().SteamDensity;
+			if (_transportBelow != null && calculatedSteamDensity >= _config.EQUILIBRIUM && _transportBelow.getPreviousState().SteamStored < _transportData.getPreviousState().SteamStored)
 			{
-				double neighbourSteamStored = _transportBelow.PreviousState.SteamStored;
-				double neighbourMaximumSteam = _transportBelow.PreviousState.ActualMaximumSteam;
+				double neighbourSteamStored = _transportBelow.getPreviousState().SteamStored;
+				double neighbourMaximumSteam = _transportBelow.getPreviousState().ActualMaximumSteam;
 				if (neighbourSteamStored < neighbourMaximumSteam && neighbourSteamStored < usableSteam)
 				{
 					_eligibleTransportData.Add(_transportBelow);
@@ -155,8 +155,8 @@ namespace SteamNSteel.Impl.Jobs
 			double originalSteamStored = usableSteam;
 			foreach (SteamTransportTransientData neighbourTransport in _eligibleTransportData)
 			{
-				double neighbourSteamStored = neighbourTransport.PreviousState.SteamStored;
-				double neighbourMaximumSteam = neighbourTransport.PreviousState.ActualMaximumSteam;
+				double neighbourSteamStored = neighbourTransport.getPreviousState().SteamStored;
+				double neighbourMaximumSteam = neighbourTransport.getPreviousState().ActualMaximumSteam;
 
 				double ratio = (neighbourMaximumSteam - neighbourSteamStored) / steamSpaceAvailable;
 
@@ -169,48 +169,48 @@ namespace SteamNSteel.Impl.Jobs
 
 				amountTransferred = amountTransferred * _config.TransferRatio;
 
-				amountTransferred = _transportData.TakeSteam(amountTransferred);
+				amountTransferred = _transportData.takeSteam(amountTransferred);
 
-				neighbourTransport.VerifyTick();
-				neighbourTransport.AddSteam(amountTransferred);
+				neighbourTransport.verifyTick();
+				neighbourTransport.addSteam(amountTransferred);
 			}
 		}
 
-		private void TransferWater()
+		private void transferWater()
 		{
-			var usableWater = _transportData.PreviousState.CondensationStored;
+			var usableWater = _transportData.getPreviousState().CondensationStored;
 
 			if (usableWater <= 0)
 			{
-				TransferWaterFromHigherPoint();
+				transferWaterFromHigherPoint();
 				return;
 			}
 			//First, work on any units above
 			if (_transportBelow != null)
 			{
-				TransferWaterBelow(usableWater);
+				transferWaterBelow(usableWater);
 			}
 
 			if (usableWater > 0 && _horizontalAdjacentTransports.Any())
 			{
-				TransferWaterAcross(usableWater);
+				transferWaterAcross(usableWater);
 			}
 
-			TransferWaterFromHigherPoint();
+			transferWaterFromHigherPoint();
 		}
 
-		private void TransferWaterFromHigherPoint()
+		private void transferWaterFromHigherPoint()
 		{
-			if (_transportData.Debug)
+			if (_transportData.getDebug())
 			{
-				Console.WriteLine($"HERE! {_transport.GetTransportLocation()}");
+				Console.WriteLine($"HERE! {_transport.getTransportLocation()}");
 			}
 
-			if (_transportBelow == null || !(_transportData.UsableSteam < _transportData.PreviousState.ActualMaximumSteam))
+			if (_transportBelow == null || !(_transportData.getUsableSteam() < _transportData.getPreviousState().ActualMaximumSteam))
 			{
 				return;
 			}
-			var previousTransportState = _transportBelow.PreviousState;
+			var previousTransportState = _transportBelow.getPreviousState();
 			if (!(Math.Abs(previousTransportState.CondensationStored - previousTransportState.MaximumCondensation) < 100))
 			{
 				return;
@@ -218,8 +218,8 @@ namespace SteamNSteel.Impl.Jobs
 
 			Stack<SearchData> elementsToSearch = new Stack<SearchData>();
 			HashSet<SteamTransportLocation> visitedLocations = new HashSet<SteamTransportLocation>();
-			visitedLocations.Add(_transport.GetTransportLocation());
-			elementsToSearch.Push(new SearchData(_transportBelow.Transport, 1));
+			visitedLocations.Add(_transport.getTransportLocation());
+			elementsToSearch.Push(new SearchData(_transportBelow.getTransport(), 1));
 			SearchData candidate = null;
 			Boolean validScenario = true;
 			while (validScenario && elementsToSearch.Any())
@@ -228,13 +228,13 @@ namespace SteamNSteel.Impl.Jobs
 
 				SteamTransport transport = searchData.Transport;
 				int depth = searchData.Depth;
-				SteamTransportLocation steamTransportLocation = transport.GetTransportLocation();
-				Console.WriteLine($"Checking transport @ {steamTransportLocation} - {depth} - {_transport.GetShouldDebug()}");
+				SteamTransportLocation steamTransportLocation = transport.getTransportLocation();
+				Console.WriteLine($"Checking transport @ {steamTransportLocation} - {depth} - {_transport.getShouldDebug()}");
 				visitedLocations.Add(steamTransportLocation);
 			
 				if (depth <= 0 && (candidate == null || depth < candidate.Depth))
 				{
-					if (searchData.Depth < 0 || (searchData.Depth == 0 && searchData.Transport.GetWaterStored() >= (_transport.GetWaterStored() + 5)))
+					if (searchData.Depth < 0 || (searchData.Depth == 0 && searchData.Transport.getWaterStored() >= (_transport.getWaterStored() + 5)))
 					{
 						candidate = searchData;
 					}
@@ -242,11 +242,11 @@ namespace SteamNSteel.Impl.Jobs
 
 				foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
 				{
-					SteamTransport adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
-					if (adjacentTransport != null && !visitedLocations.Contains(adjacentTransport.GetTransportLocation()))
+					SteamTransport adjacentTransport = (SteamTransport)transport.getAdjacentTransport(direction);
+					if (adjacentTransport != null && !visitedLocations.Contains(adjacentTransport.getTransportLocation()))
 					{
-						SteamTransportTransientData steamTransportTransientData = TheMod.SteamTransportStateMachine.GetJobDataForTransport(adjacentTransport);
-						SteamTransportTransientData.PreviousTransportState nextPreviousData = steamTransportTransientData.PreviousState;
+						SteamTransportTransientData steamTransportTransientData = TheMod.SteamTransportStateMachine.getJobDataForTransport(adjacentTransport);
+						SteamTransportTransientData.PreviousTransportState nextPreviousData = steamTransportTransientData.getPreviousState();
 
 						if ((direction == EnumFacing.EAST || direction == EnumFacing.WEST || direction == EnumFacing.NORTH ||
 						     direction == EnumFacing.SOUTH) &&
@@ -267,11 +267,11 @@ namespace SteamNSteel.Impl.Jobs
 
 			if (candidate != null)
 			{
-				Console.WriteLine($"Updating from candidate {candidate.Transport.GetTransportLocation()} - {candidate.Depth}");
+				Console.WriteLine($"Updating from candidate {candidate.Transport.getTransportLocation()} - {candidate.Depth}");
 				double condensate;
 				if (candidate.Depth == 0)
 				{
-					condensate = candidate.Transport.GetWaterStored() / 2;
+					condensate = candidate.Transport.getWaterStored() / 2;
 					if (condensate > 100)
 					{
 						condensate = 100;
@@ -282,12 +282,12 @@ namespace SteamNSteel.Impl.Jobs
 					condensate = 100;
 				}
 				
-				double actualCondensate = candidate.Transport.TakeCondensate(condensate);
-				_transportData.AddCondensate(actualCondensate);
+				double actualCondensate = candidate.Transport.takeCondensate(condensate);
+				_transportData.addCondensate(actualCondensate);
 			}
 		}
 
-		private void TransferWaterAcross(double waterUsedAtStart)
+		private void transferWaterAcross(double waterUsedAtStart)
 		{
 			_eligibleTransportData.Clear();
 
@@ -296,23 +296,23 @@ namespace SteamNSteel.Impl.Jobs
 				return;
 			}
 
-			var elementIndex = _transportData.TickLastUpdated%_horizontalAdjacentTransports.Length;
+			var elementIndex = _transportData.getTickLastUpdated()%_horizontalAdjacentTransports.Length;
 			SteamTransportTransientData nextTransport = _horizontalAdjacentTransports.ElementAt(elementIndex);
 
 			if (nextTransport == null)
 			{
 				return;
 			}
-			nextTransport.VerifyTick();
+			nextTransport.verifyTick();
 
-			double neighbourWaterStored = nextTransport.PreviousState.CondensationStored;
-			double neighbourMaximumWater = nextTransport.PreviousState.MaximumCondensation;
+			double neighbourWaterStored = nextTransport.getPreviousState().CondensationStored;
+			double neighbourMaximumWater = nextTransport.getPreviousState().MaximumCondensation;
 			if (neighbourWaterStored >= neighbourMaximumWater || !(neighbourWaterStored < waterUsedAtStart))
 			{ 
 				return;
 			}
 
-			double waterStored = _transportData.PreviousState.CondensationStored;
+			double waterStored = _transportData.getPreviousState().CondensationStored;
 			if (neighbourWaterStored >= waterStored)
 			{
 				return;
@@ -321,15 +321,15 @@ namespace SteamNSteel.Impl.Jobs
 			double desiredTransfer = (waterStored - neighbourWaterStored)/(_horizontalAdjacentTransports.Length + 1);
 			foreach (SteamTransportTransientData steamTransportTransientData in _horizontalAdjacentTransports)
 			{
-				double takeCondensate = _transportData.TakeCondensate(desiredTransfer);
-				steamTransportTransientData.AddCondensate(takeCondensate);
+				double takeCondensate = _transportData.takeCondensate(desiredTransfer);
+				steamTransportTransientData.addCondensate(takeCondensate);
 			}
 		}
 
-		private void TransferWaterBelow(double usableWater)
+		private void transferWaterBelow(double usableWater)
 		{
-			double neighbourWaterStored = _transportBelow.PreviousState.CondensationStored;
-			double neighbourMaximumWater = _transportBelow.PreviousState.MaximumCondensation;
+			double neighbourWaterStored = _transportBelow.getPreviousState().CondensationStored;
+			double neighbourMaximumWater = _transportBelow.getPreviousState().MaximumCondensation;
 
 			if (!(neighbourWaterStored < neighbourMaximumWater)) return;
 
@@ -345,10 +345,10 @@ namespace SteamNSteel.Impl.Jobs
 				amountTransferred = usableWater;
 			}
 
-			amountTransferred = _transportData.TakeCondensate(amountTransferred);
+			amountTransferred = _transportData.takeCondensate(amountTransferred);
 
-			_transportBelow.VerifyTick();
-			_transportBelow.AddCondensate(amountTransferred);
+			_transportBelow.verifyTick();
+			_transportBelow.addCondensate(amountTransferred);
 		}
 
 		private class SearchData

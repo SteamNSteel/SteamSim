@@ -22,12 +22,12 @@ namespace SteamNSteel.Impl
 		private int expectedJobs;
 		private bool expectingJobs;
 
-		public void OnTick()
+		public void onTick()
 		{
-			ProcessTransports();
+			processTransports();
 		}
 
-		private void ProcessTransports()
+		private void processTransports()
 		{
 			if (expectedJobs > 0)
 			{
@@ -41,7 +41,7 @@ namespace SteamNSteel.Impl
 			}
 
 			expectedJobs = jobs.Count;
-			foreach (var job in jobs)
+			foreach (ProcessTransportJob job in jobs)
 			{
 				TheMod.JobManager.AddBackgroundJob(job);
 			}
@@ -49,87 +49,87 @@ namespace SteamNSteel.Impl
 			expectingJobs = true;
 		}
 
-		public void PostTick()
+		public void postTick()
 		{
 			if (expectingJobs)
 			{
-//				Console.WriteLine($"{TheMod.CurrentTick} Waiting PostTick");
+//				Console.WriteLine($"{TheMod.CurrentTick} Waiting postTick");
 				barrier.SignalAndWait();
-				//Console.WriteLine($"{TheMod.CurrentTick} Finished PostTick");
+				//Console.WriteLine($"{TheMod.CurrentTick} finished postTick");
 			}
 		}
 
-		private void Finished()
+		private void finished()
 		{
 			//Console.WriteLine($"{TheMod.CurrentTick} Waiting PostJobs");
 			barrier.SignalAndWait();
 			//Console.WriteLine($"{TheMod.CurrentTick} Released PostJobs");
 		}
 
-		internal void AddTransport(SteamTransport transport)
+		internal void addTransport(SteamTransport transport)
 		{
 			TheMod.JobManager.AddPreTickJob(new RegisterTransportJob(this, transport));
 		}
 
-		internal void RemoveTransport(SteamTransport transport)
+		internal void removeTransport(SteamTransport transport)
 		{
 			TheMod.JobManager.AddPreTickJob(new UnregisterTransportJob(this, transport));
 		}
 
-		internal void AddTransportInternal(SteamTransport transport)
+		internal void addTransportInternal(SteamTransport transport)
 		{
-			var steamTransportLocation = transport.GetTransportLocation();
+			SteamTransportLocation steamTransportLocation = transport.getTransportLocation();
 			Console.WriteLine($"{TheMod.CurrentTick} Adding Transport {steamTransportLocation}");
 			TransientData.Add(transport, new SteamTransportTransientData(transport));
 
 			foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
 			{
-				if (!transport.CanConnect(direction)) continue;
-				SteamTransportLocation altSteamTransportLocation = steamTransportLocation.Offset(direction);
+				if (!transport.canConnect(direction)) continue;
+				SteamTransportLocation altSteamTransportLocation = steamTransportLocation.offset(direction);
 				
 				ProcessTransportJob foundTransportJob;
                 if (!IndividualTransportJobs.TryGetValue(altSteamTransportLocation, out foundTransportJob)) continue;
 				SteamTransport foundTransport = foundTransportJob._transport;
 				EnumFacing oppositeDirection = direction.getOpposite();
-				if (!foundTransport.CanConnect(oppositeDirection)) continue;
+				if (!foundTransport.canConnect(oppositeDirection)) continue;
 
-				transport.SetAdjacentTransport(direction, foundTransport);
-				foundTransport.SetAdjacentTransport(oppositeDirection, transport);
+				transport.setAdjacentTransport(direction, foundTransport);
+				foundTransport.setAdjacentTransport(oppositeDirection, transport);
 			}
 
 			IndividualTransportJobs.Add(steamTransportLocation, new ProcessTransportJob(transport, this, _steamNSteelConfiguration));
 		}
 
-		internal void RemoveTransportInternal(SteamTransport transport)
+		internal void removeTransportInternal(SteamTransport transport)
 		{
-			IndividualTransportJobs.Remove(transport.GetTransportLocation());
+			IndividualTransportJobs.Remove(transport.getTransportLocation());
 			TransientData.Remove(transport);
 
 			foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
 			{
-				SteamTransport adjacentTransport = (SteamTransport)transport.GetAdjacentTransport(direction);
+				SteamTransport adjacentTransport = (SteamTransport)transport.getAdjacentTransport(direction);
 				if (adjacentTransport == null) continue;
 
-				adjacentTransport.SetAdjacentTransport(direction.getOpposite(), null);
+				adjacentTransport.setAdjacentTransport(direction.getOpposite(), null);
 			}
 		}
 
-		internal SteamTransportTransientData GetJobDataForTransport(ISteamTransport processTransportJob)
+		internal SteamTransportTransientData getJobDataForTransport(ISteamTransport processTransportJob)
 		{
 			return TransientData[processTransportJob];
 		}
 
-		public void JobComplete()
+		public void jobComplete()
 		{
 			if (Interlocked.Decrement(ref expectedJobs) == 0)
 			{
-				Finished();
+				finished();
 			}
 		}
 	}
 
 	internal interface INotifyTransportJobComplete
 	{
-		void JobComplete();
+		void jobComplete();
 	}
 }
