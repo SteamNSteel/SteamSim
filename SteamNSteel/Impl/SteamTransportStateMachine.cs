@@ -53,17 +53,17 @@ namespace SteamNSteel.Impl
 		{
 			if (expectingJobs)
 			{
-				Console.WriteLine($"{TheMod.CurrentTick} Waiting PostTick");
+//				Console.WriteLine($"{TheMod.CurrentTick} Waiting PostTick");
 				barrier.SignalAndWait();
-				Console.WriteLine($"{TheMod.CurrentTick} Finished PostTick");
+				//Console.WriteLine($"{TheMod.CurrentTick} Finished PostTick");
 			}
 		}
 
 		private void Finished()
 		{
-			Console.WriteLine($"{TheMod.CurrentTick} Waiting PostJobs");
+			//Console.WriteLine($"{TheMod.CurrentTick} Waiting PostJobs");
 			barrier.SignalAndWait();
-			Console.WriteLine($"{TheMod.CurrentTick} Released PostJobs");
+			//Console.WriteLine($"{TheMod.CurrentTick} Released PostJobs");
 		}
 
 		internal void AddTransport(SteamTransport transport)

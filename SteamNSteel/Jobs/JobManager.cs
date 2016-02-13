@@ -46,7 +46,9 @@ namespace SteamNSteel.Jobs
             Stop();
             _backgroundJobs = new BlockingCollection<IJob>();
             running = true;
-            for (int i = 0; i < Environment.ProcessorCount; ++i)
+	        var processorCount = Environment.ProcessorCount;
+	        processorCount = 1;
+	        for (int i = 0; i < processorCount; ++i)
             {
                 Thread t = new Thread(StartJobThread);
                 t.Name = "Job Thread #" + i;
