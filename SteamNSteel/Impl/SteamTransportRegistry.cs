@@ -30,7 +30,7 @@ namespace SteamNSteel.Impl
 		        result.setCanConnect(direction, canConnect);
 	        }
 
-	        TheMod.SteamTransportStateMachine.AddTransport(result);
+	        TheMod.SteamTransportStateMachine.addTransport(result);
 			return result;
         }
 
@@ -41,7 +41,7 @@ namespace SteamNSteel.Impl
 
 	        if (_steamTransports.TryRemove(steamTransportLocation, out transport))
 	        {
-		        TheMod.SteamTransportStateMachine.RemoveTransport(transport);
+		        TheMod.SteamTransportStateMachine.removeTransport(transport);
 	        }
         }
 

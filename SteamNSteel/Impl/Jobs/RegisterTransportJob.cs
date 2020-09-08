@@ -20,7 +20,7 @@ namespace SteamNSteel.Impl.Jobs
 
 		public void execute()
 		{
-			_steamTransportStateMachine.AddTransportInternal(_transport);
+			_steamTransportStateMachine.addTransportInternal(_transport);
 		}
 	}
 }
