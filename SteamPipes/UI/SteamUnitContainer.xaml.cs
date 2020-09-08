@@ -35,7 +35,7 @@ namespace SteamPipes.UI
 			}
 			else
 			{
-			    var steamTransport = SteamUnit.GetSteamTransport();
+			    var steamTransport = SteamUnit.getSteamTransport();
 
 				//if (SteamUnit.Debug)
 				//TODO: Vary colour by pipe temperature
@@ -170,7 +170,7 @@ namespace SteamPipes.UI
 			if (SteamUnit != null)
 			{
 				SteamUnit.DataChanged -= SteamUnitDataChanged;
-                SteamUnit.Destroy();
+                SteamUnit.destroy();
 				SteamUnit = null;
 			}
 			InvalidateVisual();
@@ -178,25 +178,25 @@ namespace SteamPipes.UI
 
 		public void InjectSteam(int amount)
 		{
-		    SteamUnit?.GetSteamTransport().addSteam(amount);
+		    SteamUnit?.getSteamTransport().addSteam(amount);
 			InvalidateVisual();
 		}
 
 		public void InjectCondensation(int amount)
 		{
-			SteamUnit?.GetSteamTransport().addCondensate(amount);
+			SteamUnit?.getSteamTransport().addCondensate(amount);
 			InvalidateVisual();
 		}
 
 		public void RemoveSteam(int amount)
 		{
-		    SteamUnit?.GetSteamTransport().takeSteam(amount);
+		    SteamUnit?.getSteamTransport().takeSteam(amount);
 			InvalidateVisual();
 		}
 
 		public void RemoveCondensation(int amount)
 		{
-			SteamUnit?.GetSteamTransport().takeCondensate(amount);
+			SteamUnit?.getSteamTransport().takeCondensate(amount);
 			InvalidateVisual();
 		}
 
@@ -217,7 +217,7 @@ namespace SteamPipes.UI
 
 		public void ToggleDebug()
 		{
-		    SteamUnit?.GetSteamTransport().toggleDebug();
+		    SteamUnit?.getSteamTransport().toggleDebug();
 			InvalidateVisual();
 		}
 
@@ -225,14 +225,14 @@ namespace SteamPipes.UI
 		{
 			if (SteamUnit != null && (!(SteamUnit is T)))
 			{
-			    SteamUnit.Destroy();
+			    SteamUnit.destroy();
 				SteamUnit.DataChanged -= SteamUnitDataChanged;
 				SteamUnit = null;
 			}
 			if (SteamUnit == null)
 			{
                 SteamUnit = new T();
-                SteamUnit.SetLocation(Grid.GetColumn(this), Grid.GetRow(this));
+                SteamUnit.setLocation(Grid.GetColumn(this), Grid.GetRow(this));
 				SteamUnit.DataChanged += SteamUnitDataChanged;
 			}
 			InvalidateVisual();

@@ -58,7 +58,7 @@ namespace SteamPipes
 
 		private static void DoTick()
 		{
-			TheMod.OnTick();
+			TheMod.onTick();
 
 			lock (ChildMod.TileEntities)
 			{
@@ -68,7 +68,7 @@ namespace SteamPipes
 				}
 			}
 
-			TheMod.PostTick();
+			TheMod.postTick();
 		}
 
 		protected override void OnClosing(CancelEventArgs e)

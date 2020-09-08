@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Steam.Machines
+﻿namespace Steam.Machines
 {
     public class FurnaceTileEntity : ModTileEntity
     {
@@ -13,10 +7,10 @@ namespace Steam.Machines
             
         }
 
-        public override void OnTick()
+        public override void onTick()
         {
-            GetSteamTransport().takeSteam(5);
-            base.OnTick();
+            getSteamTransport().takeSteam(5);
+            base.onTick();
         }
     }
 }

@@ -6,12 +6,12 @@
         protected int _y;
 
 
-        public virtual void SetLocation(int x, int y)
+        public virtual void setLocation(int x, int y)
         {
             _x = x;
             _y = y;
         }
 
-        public virtual void OnTick() { }
+        public virtual void onTick() { }
     }
 }

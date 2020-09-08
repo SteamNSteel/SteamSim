@@ -56,35 +56,35 @@ namespace SteamNSteel.Impl.Jobs
 			SteamTransportStateMachine stateMachine = TheMod.SteamTransportStateMachine;
 			List<SteamTransportTransientData> adjacentTransports = new List<SteamTransportTransientData>();
 
-			SteamTransport adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(EnumFacing.NORTH);
+			SteamTransport adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(Direction.NORTH);
 			if (adjacentTransport != null)
 			{
 				adjacentTransports.Add(stateMachine.getJobDataForTransport(adjacentTransport));
 			}
-			adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(EnumFacing.EAST);
+			adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(Direction.EAST);
 			if (adjacentTransport != null)
 			{
 				adjacentTransports.Add(stateMachine.getJobDataForTransport(adjacentTransport));
 			}
-			adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(EnumFacing.SOUTH);
+			adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(Direction.SOUTH);
 			if (adjacentTransport != null)
 			{
 				adjacentTransports.Add(stateMachine.getJobDataForTransport(adjacentTransport));
 			}
-			adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(EnumFacing.WEST);
+			adjacentTransport = (SteamTransport) _transport.getAdjacentTransport(Direction.WEST);
 			if (adjacentTransport != null)
 			{
 				adjacentTransports.Add(stateMachine.getJobDataForTransport(adjacentTransport));
 			}
 			_horizontalAdjacentTransports = adjacentTransports.ToArray();
 
-			adjacentTransport = (SteamTransport)_transport.getAdjacentTransport(EnumFacing.UP);
+			adjacentTransport = (SteamTransport)_transport.getAdjacentTransport(Direction.UP);
 			_transportAbove = adjacentTransport == null ? null : stateMachine.getJobDataForTransport(adjacentTransport);
 			if (_transportAbove != null)
 			{
 				adjacentTransports.Add(_transportAbove);
 			}
-			adjacentTransport = (SteamTransport)_transport.getAdjacentTransport(EnumFacing.DOWN);
+			adjacentTransport = (SteamTransport)_transport.getAdjacentTransport(Direction.DOWN);
 			_transportBelow = adjacentTransport == null ? null : stateMachine.getJobDataForTransport(adjacentTransport);
 			if (_transportBelow != null)
 			{
@@ -240,7 +240,7 @@ namespace SteamNSteel.Impl.Jobs
 					}
 				}
 
-				foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
+				foreach (Direction direction in Direction.VALID_DIRECTIONS)
 				{
 					SteamTransport adjacentTransport = (SteamTransport)transport.getAdjacentTransport(direction);
 					if (adjacentTransport != null && !visitedLocations.Contains(adjacentTransport.getTransportLocation()))
@@ -248,8 +248,8 @@ namespace SteamNSteel.Impl.Jobs
 						SteamTransportTransientData steamTransportTransientData = TheMod.SteamTransportStateMachine.getJobDataForTransport(adjacentTransport);
 						SteamTransportTransientData.PreviousTransportState nextPreviousData = steamTransportTransientData.getPreviousState();
 
-						if ((direction == EnumFacing.EAST || direction == EnumFacing.WEST || direction == EnumFacing.NORTH ||
-						     direction == EnumFacing.SOUTH) &&
+						if ((direction == Direction.EAST || direction == Direction.WEST || direction == Direction.NORTH ||
+						     direction == Direction.SOUTH) &&
 						    nextPreviousData.CondensationStored < nextPreviousData.MaximumCondensation - 10)
 						{
 							validScenario = false;

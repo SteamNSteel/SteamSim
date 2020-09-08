@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Steam.API;
+﻿using Steam.API;
 using SteamNSteel.Impl;
 using SteamNSteel.Jobs;
 
@@ -16,31 +12,31 @@ namespace SteamNSteel
 
 		public static int CurrentTick { get; private set; }
 
-		public static void OnSteamNSteelInitialized(SteamNSteelInitializedEvent evt)
+		public static void onSteamNSteelInitialized(SteamNSteelInitializedEvent evt)
 		{
-			SteamTransportRegistry = (SteamTransportRegistry) evt.GetSteamTransportRegistry();
+			SteamTransportRegistry = (SteamTransportRegistry) evt.getSteamTransportRegistry();
 			SteamTransportStateMachine = new SteamTransportStateMachine();
 			JobManager = new JobManager();
-			JobManager.Start();
+			JobManager.start();
         }
 
-		public static void OnTick()
+		public static void onTick()
 		{
 			//TODO: Replace this with the world tick
 			CurrentTick++;
 			//TODO: Register JobManager for world tick events and handle this there.
-			JobManager.DoPretickJobs();
+			JobManager.doPretickJobs();
 			SteamTransportStateMachine.onTick();
         }
 
-		public static void PostTick()
+		public static void postTick()
 		{
 			SteamTransportStateMachine.postTick();
 		}
 
-		public static void OnSteamNSteelShuttingDown()
+		public static void onSteamNSteelShuttingDown()
 		{
-			JobManager.Stop();
+			JobManager.stop();
 		}
 	}
 }

@@ -8,40 +8,40 @@ namespace Steam.Machines
     {
         private ISteamTransport _steamTransport;
 
-        public override void SetLocation(int x, int y)
+        public override void setLocation(int x, int y)
         {
-            base.SetLocation(x, y);
-            _steamTransport = ChildMod.SteamTransportRegistry.registerSteamTransport(x, y, GetValidSteamTransportDirections());
-            ChildMod.AddTileEntity(this);
+            base.setLocation(x, y);
+            _steamTransport = ChildMod.SteamTransportRegistry.registerSteamTransport(x, y, getValidSteamTransportDirections());
+            ChildMod.addTileEntity(this);
         }
 
-        protected virtual EnumFacing[] GetValidSteamTransportDirections()
+        protected virtual Direction[] getValidSteamTransportDirections()
         {
             return new []
             {
-                EnumFacing.DOWN, 
-                EnumFacing.UP,
-                EnumFacing.NORTH,
-                EnumFacing.SOUTH,
-                EnumFacing.WEST,
-                EnumFacing.EAST
+                Direction.DOWN, 
+                Direction.UP,
+                Direction.NORTH,
+                Direction.SOUTH,
+                Direction.WEST,
+                Direction.EAST
             };
         }
 
-        public ISteamTransport GetSteamTransport()
+        public ISteamTransport getSteamTransport()
         {
             return _steamTransport;
         }
 
         public event EventHandler<EventArgs> DataChanged;
 
-        public void Destroy()
+        public void destroy()
         {
             ChildMod.SteamTransportRegistry.destroySteamTransport(_x, _y);
-            ChildMod.RemoveTileEntity(this);
+            ChildMod.removeTileEntity(this);
         }
 
-        public override void OnTick()
+        public override void onTick()
         {
             DataChanged?.Invoke(this, new EventArgs());
         }

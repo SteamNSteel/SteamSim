@@ -9,7 +9,7 @@
             _steamTransportRegistry = steamTransportRegistry;
         }
 
-        public ISteamTransportRegistry GetSteamTransportRegistry()
+        public ISteamTransportRegistry getSteamTransportRegistry()
         {
             return _steamTransportRegistry;
         }

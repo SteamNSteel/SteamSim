@@ -52,7 +52,7 @@ namespace SteamNSteel.Impl
             return Equals((SteamTransportLocation) obj);
         }
 
-	    public SteamTransportLocation offset(EnumFacing direction)
+	    public SteamTransportLocation offset(Direction direction)
 	    {
 			//Fixme: Use a pool?
 		    return new SteamTransportLocation(X + direction.offsetX, Y + direction.offsetY, Z + direction.offsetZ, WorldId);

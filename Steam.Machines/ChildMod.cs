@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Steam.API;
 
 namespace Steam.Machines
@@ -15,10 +10,10 @@ namespace Steam.Machines
 
         public static void OnSteamNSteelInitialized(SteamNSteelInitializedEvent evt)
         {
-            SteamTransportRegistry = evt.GetSteamTransportRegistry();
+            SteamTransportRegistry = evt.getSteamTransportRegistry();
         }
 
-        public static void AddTileEntity(ModTileEntity tileEntity)
+        public static void addTileEntity(ModTileEntity tileEntity)
         {
             lock (TileEntities)
             {
@@ -26,7 +21,7 @@ namespace Steam.Machines
             }
         }
 
-        public static void RemoveTileEntity(ModTileEntity tileEntity)
+        public static void removeTileEntity(ModTileEntity tileEntity)
         {
             lock (TileEntities)
             {

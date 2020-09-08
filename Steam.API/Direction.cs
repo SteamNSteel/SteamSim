@@ -1,27 +1,27 @@
 ﻿namespace Steam.API
 {
-    public struct EnumFacing
+    public struct Direction
     {
 		//Y has been reversed for this program because XAML.
 		/** -Y */
-		//public static readonly EnumFacing DOWN = new EnumFacing(0, -1, 0, 0);
-		public static readonly EnumFacing DOWN = new EnumFacing(0, 1, 0, 0, "DOWN");
+		//public static readonly Direction DOWN = new Direction(0, -1, 0, 0);
+		public static readonly Direction DOWN = new Direction(0, 1, 0, 0, "DOWN");
 		/** +Y */
-		//public static readonly EnumFacing UP = new EnumFacing(0, 1, 0, 1);
-		public static readonly EnumFacing UP = new EnumFacing(0, -1, 0, 1, "UP");
+		//public static readonly Direction UP = new Direction(0, 1, 0, 1);
+		public static readonly Direction UP = new Direction(0, -1, 0, 1, "UP");
 		/** -Z */
-		public static readonly EnumFacing NORTH = new EnumFacing(0, 0, -1, 2, "NORTH");
+		public static readonly Direction NORTH = new Direction(0, 0, -1, 2, "NORTH");
         /** +Z */
-        public static readonly EnumFacing SOUTH = new EnumFacing(0, 0, 1, 3, "SOUTH");
+        public static readonly Direction SOUTH = new Direction(0, 0, 1, 3, "SOUTH");
         /** -X */
-        public static readonly EnumFacing WEST = new EnumFacing(-1, 0, 0, 4, "WEST");
+        public static readonly Direction WEST = new Direction(-1, 0, 0, 4, "WEST");
         /** +X */
-        public static readonly EnumFacing EAST = new EnumFacing(1, 0, 0, 5, "EAST");
+        public static readonly Direction EAST = new Direction(1, 0, 0, 5, "EAST");
         /**
          * Used only by getOrientation, for invalid inputs
          */
-        public static readonly EnumFacing UNKNOWN = new EnumFacing(0, 0, 0, 6, "UNKNOWN");
-        public static readonly EnumFacing[] VALID_DIRECTIONS = {DOWN, UP, NORTH, SOUTH, WEST, EAST};
+        public static readonly Direction UNKNOWN = new Direction(0, 0, 0, 6, "UNKNOWN");
+        public static readonly Direction[] VALID_DIRECTIONS = {DOWN, UP, NORTH, SOUTH, WEST, EAST};
         public static readonly int[] OPPOSITES = {1, 0, 3, 2, 5, 4, 6};
         // Left hand rule rotation matrix for all possible axes of rotation
         public static readonly int[,] ROTATION_MATRIX =
@@ -42,7 +42,7 @@
         public readonly int offsetY;
         public readonly int offsetZ;
 
-        private EnumFacing(int x, int y, int z, int ordinal, string name)
+        private Direction(int x, int y, int z, int ordinal, string name)
         {
             offsetX = x;
             offsetY = y;
@@ -52,7 +52,7 @@
 	        flag = 1 << ordinal;
         }
 
-        public static EnumFacing getOrientation(int id)
+        public static Direction getOrientation(int id)
         {
             if (id >= 0 && id < VALID_DIRECTIONS.Length)
             {
@@ -61,27 +61,27 @@
             return UNKNOWN;
         }
 
-        public EnumFacing getOpposite()
+        public Direction getOpposite()
         {
             return getOrientation(OPPOSITES[_ordinal]);
         }
 
-        public EnumFacing getRotation(EnumFacing axis)
+        public Direction getRotation(Direction axis)
         {
             return getOrientation(ROTATION_MATRIX[axis._ordinal, _ordinal]);
         }
 
-        public static explicit operator int(EnumFacing v)
+        public static explicit operator int(Direction v)
         {
             return v._ordinal;
         }
 
-	    public static bool operator ==(EnumFacing a, EnumFacing b)
+	    public static bool operator ==(Direction a, Direction b)
 	    {
 		    return a._ordinal == b._ordinal;
 	    }
 
-		public static bool operator !=(EnumFacing a, EnumFacing b)
+		public static bool operator !=(Direction a, Direction b)
 		{
 			return a._ordinal != b._ordinal;
 		}

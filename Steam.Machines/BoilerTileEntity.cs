@@ -4,20 +4,20 @@ namespace Steam.Machines
 {
     public class BoilerTileEntity : ModTileEntity
     {
-        public override void OnTick()
+        public override void onTick()
         {
-            GetSteamTransport().addSteam(20);
-            base.OnTick();
+            getSteamTransport().addSteam(20);
+            base.onTick();
         }
 
-        protected override EnumFacing[] GetValidSteamTransportDirections()
+        protected override Direction[] getValidSteamTransportDirections()
         {
             return new []
             {
-                EnumFacing.NORTH,
-                EnumFacing.SOUTH,
-                EnumFacing.EAST,
-                EnumFacing.WEST,
+                Direction.NORTH,
+                Direction.SOUTH,
+                Direction.EAST,
+                Direction.WEST,
             };
         }
     }

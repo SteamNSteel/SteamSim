@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Steam.Machines
+﻿namespace Steam.Machines
 {
     public class BallMillTileEntity : ModTileEntity
     {
         public override void OnTick()
         {
             
-            GetSteamTransport().takeSteam(2);
+            getSteamTransport().takeSteam(2);
             base.OnTick();
 
         }

@@ -93,9 +93,9 @@ namespace SteamNSteel.Impl
             _maximumSteam = maximumUnitsOfSteam;
         }
 
-        public void setMaximumCondensate(double maximimUnitsOfWater)
+        public void setMaximumCondensate(double maximumUnitsOfWater)
         {
-            _maximumWater = maximimUnitsOfWater;
+            _maximumWater = maximumUnitsOfWater;
         }
 
         public void toggleDebug()
@@ -143,17 +143,17 @@ namespace SteamNSteel.Impl
 			return _heatConductivity;
 		}
 		
-        public void setCanConnect(EnumFacing direction, bool canConnect)
+        public void setCanConnect(Direction direction, bool canConnect)
         {
             _canConnect[(int)direction] = canConnect;
         }
 
-        public bool canConnect(EnumFacing direction)
+        public bool canConnect(Direction direction)
         {
             return _canConnect[(int) direction];
         }
 
-        public void setAdjacentTransport(EnumFacing direction, ISteamTransport transport)
+        public void setAdjacentTransport(Direction direction, ISteamTransport transport)
         {
             if (canConnect(direction))
 
@@ -161,31 +161,31 @@ namespace SteamNSteel.Impl
 	        StructureChanged = true;
         }
 
-        public ISteamTransport getAdjacentTransport(EnumFacing direction)
+        public ISteamTransport getAdjacentTransport(Direction direction)
         {
             return _adjacentTransports[(int)direction];
         }
 
         public bool canTransportAbove()
         {
-            return _adjacentTransports[(int) EnumFacing.UP] != null;
+            return _adjacentTransports[(int) Direction.UP] != null;
         }
 
         public bool canTransportBelow()
         {
-            return _adjacentTransports[(int)EnumFacing.DOWN] != null;
+            return _adjacentTransports[(int)Direction.DOWN] != null;
         }
 
 		[Obsolete]
         public bool canTransportWest()
         {
-            return _adjacentTransports[(int)EnumFacing.WEST] != null;
+            return _adjacentTransports[(int)Direction.WEST] != null;
         }
 
 		[Obsolete]
 		public bool canTransportEast()
         {
-            return _adjacentTransports[(int)EnumFacing.EAST] != null;
+            return _adjacentTransports[(int)Direction.EAST] != null;
         }
 
         internal SteamTransportLocation getTransportLocation()

@@ -16,11 +16,11 @@ namespace SteamNSteel.Impl
 				return steamStored > 0 ? 100 : 0;
 			}
 
-			var x = steamStored;
-			var c = maximumSteam;
-			var a = c / 100;
-			var b = 100 / c;
-			var y = Math.Log10((x + a) * b) * 50;
+			double x = steamStored;
+			double c = maximumSteam;
+			double a = c / 100;
+			double b = 100 / c;
+			double y = Math.Log10((x + a) * b) * 50;
 			if (y > 100)
 			{
 				return 100;

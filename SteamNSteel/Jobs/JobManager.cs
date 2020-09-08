@@ -12,17 +12,17 @@ namespace SteamNSteel.Jobs
         private BlockingCollection<IJob> _backgroundJobs = new BlockingCollection<IJob>(); 
 		private ConcurrentQueue<IJob> _pretickJobs = new ConcurrentQueue<IJob>();
 		
-	    public void AddBackgroundJob(IJob job)
+	    public void addBackgroundJob(IJob job)
 	    {
 		    _backgroundJobs.Add(job);
 	    }
 
-	    public void AddPreTickJob(IJob job)
+	    public void addPreTickJob(IJob job)
 	    {
 		    _pretickJobs.Enqueue(job);
 	    }
 
-	    public void DoPretickJobs()
+	    public void doPretickJobs()
 	    {
 		    while (!_pretickJobs.IsEmpty)
 		    {
@@ -34,23 +34,23 @@ namespace SteamNSteel.Jobs
 		    }
 	    }
 
-        public void Start()
+        public void start()
         {
-            Stop();
+            stop();
             _backgroundJobs = new BlockingCollection<IJob>();
             running = true;
 	        int processorCount = Environment.ProcessorCount;
 	        processorCount = 1;
 	        for (int i = 0; i < processorCount; ++i)
             {
-                Thread t = new Thread(StartJobThread);
+                Thread t = new Thread(startJobThread);
                 t.Name = "Job Thread #" + i;
                 JobThreads.Add(t);
                 t.Start();
             }
         }
 
-        public void Stop()
+        public void stop()
         {
             running = false;
             _backgroundJobs.CompleteAdding();
@@ -61,7 +61,7 @@ namespace SteamNSteel.Jobs
             JobThreads.Clear();
         }
 
-        private void StartJobThread()
+        private void startJobThread()
         {
             while (running)
             {

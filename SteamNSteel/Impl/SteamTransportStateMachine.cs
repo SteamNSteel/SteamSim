@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using Steam.API;
 using SteamNSteel.Impl.Jobs;
-using SteamNSteel.Jobs;
 
 namespace SteamNSteel.Impl
 {
@@ -43,7 +42,7 @@ namespace SteamNSteel.Impl
 			expectedJobs = jobs.Count;
 			foreach (ProcessTransportJob job in jobs)
 			{
-				TheMod.JobManager.AddBackgroundJob(job);
+				TheMod.JobManager.addBackgroundJob(job);
 			}
 
 			expectingJobs = true;
@@ -68,12 +67,12 @@ namespace SteamNSteel.Impl
 
 		internal void addTransport(SteamTransport transport)
 		{
-			TheMod.JobManager.AddPreTickJob(new RegisterTransportJob(this, transport));
+			TheMod.JobManager.addPreTickJob(new RegisterTransportJob(this, transport));
 		}
 
 		internal void removeTransport(SteamTransport transport)
 		{
-			TheMod.JobManager.AddPreTickJob(new UnregisterTransportJob(this, transport));
+			TheMod.JobManager.addPreTickJob(new UnregisterTransportJob(this, transport));
 		}
 
 		internal void addTransportInternal(SteamTransport transport)
@@ -82,7 +81,7 @@ namespace SteamNSteel.Impl
 			Console.WriteLine($"{TheMod.CurrentTick} Adding Transport {steamTransportLocation}");
 			TransientData.Add(transport, new SteamTransportTransientData(transport));
 
-			foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
+			foreach (Direction direction in Direction.VALID_DIRECTIONS)
 			{
 				if (!transport.canConnect(direction)) continue;
 				SteamTransportLocation altSteamTransportLocation = steamTransportLocation.offset(direction);
@@ -90,7 +89,7 @@ namespace SteamNSteel.Impl
 				ProcessTransportJob foundTransportJob;
                 if (!IndividualTransportJobs.TryGetValue(altSteamTransportLocation, out foundTransportJob)) continue;
 				SteamTransport foundTransport = foundTransportJob._transport;
-				EnumFacing oppositeDirection = direction.getOpposite();
+				Direction oppositeDirection = direction.getOpposite();
 				if (!foundTransport.canConnect(oppositeDirection)) continue;
 
 				transport.setAdjacentTransport(direction, foundTransport);
@@ -105,7 +104,7 @@ namespace SteamNSteel.Impl
 			IndividualTransportJobs.Remove(transport.getTransportLocation());
 			TransientData.Remove(transport);
 
-			foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
+			foreach (Direction direction in Direction.VALID_DIRECTIONS)
 			{
 				SteamTransport adjacentTransport = (SteamTransport)transport.getAdjacentTransport(direction);
 				if (adjacentTransport == null) continue;

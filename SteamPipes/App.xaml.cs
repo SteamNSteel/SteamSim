@@ -17,13 +17,13 @@ namespace SteamPipes
 
 	    public App()
 	    {
-			TheMod.OnSteamNSteelInitialized(new SteamNSteelInitializedEvent(SteamTransportRegistry));
+			TheMod.onSteamNSteelInitialized(new SteamNSteelInitializedEvent(SteamTransportRegistry));
 			ChildMod.OnSteamNSteelInitialized(new SteamNSteelInitializedEvent(SteamTransportRegistry));
         }
 
 	    protected override void OnExit(ExitEventArgs e)
 	    {
-		    TheMod.OnSteamNSteelShuttingDown();
+		    TheMod.onSteamNSteelShuttingDown();
 	    }
 	}
 }

@@ -12,7 +12,7 @@
 
         void setMaximumSteam(double maximumUnitsOfSteam);
 
-        void setMaximumCondensate(double maximimUnitsOfWater);
+        void setMaximumCondensate(double maximumUnitsOfWater);
 
         void toggleDebug();
 

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
 using Steam.API;
 
 namespace SteamNSteel.Impl
@@ -12,19 +11,19 @@ namespace SteamNSteel.Impl
         private readonly ConcurrentDictionary<SteamTransportLocation, SteamTransport> _steamTransports =
             new ConcurrentDictionary<SteamTransportLocation, SteamTransport>();
 
-        public ISteamTransport registerSteamTransport(int x, int y, EnumFacing[] initialAllowedDirections)
+        public ISteamTransport registerSteamTransport(int x, int y, Direction[] initialAllowedDirections)
         {
 			SteamTransportLocation steamTransportLocation = SteamTransportLocation.create(x, y);
             SteamTransport result = _steamTransports.GetOrAdd(steamTransportLocation, new SteamTransport(steamTransportLocation));
 
 			bool[] allowedDirections = new bool[6];
 
-			foreach (EnumFacing initialAllowedDirection in initialAllowedDirections)
+			foreach (Direction initialAllowedDirection in initialAllowedDirections)
 			{
 				allowedDirections[(int)initialAllowedDirection] = true;
 			}
 
-	        foreach (EnumFacing direction in EnumFacing.VALID_DIRECTIONS)
+	        foreach (Direction direction in Direction.VALID_DIRECTIONS)
 	        {
 		        bool canConnect = allowedDirections[(int) direction];
 		        result.setCanConnect(direction, canConnect);
